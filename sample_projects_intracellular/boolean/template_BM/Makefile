@@ -1,5 +1,5 @@
 VERSION := $(shell grep . VERSION.txt | cut -f1 -d:)
-PROGRAM_NAME := template_BM
+PROGRAM_NAME := project
 
 CC := g++
 # CC := g++-mp-7 # typical macports compiler name
@@ -14,7 +14,7 @@ endif
 ### MaBoSS configuration 
 # MaBoSS max nodes
 ifndef MABOSS_MAX_NODES
-MABOSS_MAX_NODES = 64
+MABOSS_MAX_NODES = 256
 endif
 
 # MaBoSS directory
@@ -33,6 +33,10 @@ INC := -DADDON_PHYSIBOSS -I$(CUR_DIR)/$(MABOSS_DIR)/include -DMAXNODES=$(MABOSS_
 # If max nodes > 64, change lib path 
 ifeq ($(shell expr $(MABOSS_MAX_NODES) '>' 64), 1)
 LIB := -L$(CUR_DIR)/$(MABOSS_DIR)/lib -lMaBoSS_$(MABOSS_MAX_NODES)n-static $(LDL_FLAG)
+endif
+
+ifndef STATIC_OPENMP
+	STATIC_OPENMP = -fopenmp
 endif
 
 ARCH := native # best auto-tuning
@@ -68,7 +72,9 @@ else
 	endif
 endif
 
-COMPILE_COMMAND := $(CC) $(CFLAGS) 
+CFLAGS_LINK := $(shell echo $(CFLAGS) | sed -e "s/-fopenmp//g")
+COMPILE_COMMAND := $(CC) $(CFLAGS)  $(EXTRA_FLAGS)
+LINK_COMMAND := $(CC) $(CFLAGS_LINK) $(EXTRA_FLAGS)
 
 BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
@@ -85,7 +91,7 @@ MaBoSS := ./addons/PhysiBoSS/MaBoSS-env-2.0/engine/src/BooleanNetwork.h
 
 PhysiBoSS_OBJECTS := maboss_network.o maboss_intracellular.o
 
-PhysiCell_custom_module_OBJECTS := custom.o custom_main.o
+PhysiCell_custom_module_OBJECTS := custom.o
 
 pugixml_OBJECTS := pugixml.o
 
@@ -96,6 +102,15 @@ ALL_OBJECTS := $(PhysiCell_OBJECTS) $(PhysiCell_custom_module_OBJECTS) $(PhysiBo
 
 all: main.cpp $(ALL_OBJECTS) $(MaBoSS)
 	$(COMPILE_COMMAND) $(INC) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB)
+	make name 
+
+static: main.cpp $(ALL_OBJECTS) $(MaBoSS)
+	$(LINK_COMMAND) $(INC) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB) -static-libgcc -static-libstdc++ $(STATIC_OPENMP)
+
+name:
+	@echo ""
+	@echo "Executable name is" $(PROGRAM_NAME)
+	@echo ""
 
 # PhysiCell core components	
 
@@ -119,10 +134,10 @@ PhysiCell_utilities.o: ./core/PhysiCell_utilities.cpp
 	
 PhysiCell_custom.o: ./core/PhysiCell_custom.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_custom.cpp 
-
+	
 PhysiCell_constants.o: ./core/PhysiCell_constants.cpp
-	$(COMPILE_COMMAND) -c ./core/PhysiCell_constants.cpp
-		
+	$(COMPILE_COMMAND) -c ./core/PhysiCell_constants.cpp 
+	
 PhysiCell_signal_behavior.o: ./core/PhysiCell_signal_behavior.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_signal_behavior.cpp 
 	
@@ -175,15 +190,14 @@ PhysiCell_MultiCellDS.o: ./modules/PhysiCell_MultiCellDS.cpp
 PhysiCell_various_outputs.o: ./modules/PhysiCell_various_outputs.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_various_outputs.cpp
 
-	
 PhysiCell_pugixml.o: ./modules/PhysiCell_pugixml.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_pugixml.cpp
 	
 PhysiCell_settings.o: ./modules/PhysiCell_settings.cpp
-	$(COMPILE_COMMAND) -c ./modules/PhysiCell_settings.cpp	
-		
+	$(COMPILE_COMMAND) -c ./modules/PhysiCell_settings.cpp
+	
 PhysiCell_basic_signaling.o: ./core/PhysiCell_basic_signaling.cpp
-	$(COMPILE_COMMAND) -c ./core/PhysiCell_basic_signaling.cpp
+	$(COMPILE_COMMAND) -c ./core/PhysiCell_basic_signaling.cpp 	
 	
 PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_geometry.cpp 
@@ -191,7 +205,7 @@ PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 # user-defined PhysiCell modules
 
 Compile_MaBoSS: ./addons/PhysiBoSS/MaBoSS-env-2.0/engine/src/BooleanNetwork.h
-	cd ./addons/PhysiBoSS/MaBoSS-env-2.0/engine/src;make CXX=$(CC) install_alib;make clean; cd ../../../../..
+	cd ./addons/PhysiBoSS/MaBoSS-env-2.0/engine/src;make CXX=$(CC) MAXNODES=$(MABOSS_MAX_NODES) install_alib;make clean; cd ../../../../..
 
 $(MaBoSS): 
 ifeq ($(OS), Windows_NT)
@@ -207,10 +221,7 @@ maboss_intracellular.o: ./addons/PhysiBoSS/src/maboss_intracellular.cpp $(MaBoSS
 	$(COMPILE_COMMAND) $(INC) -c ./addons/PhysiBoSS/src/maboss_intracellular.cpp
 
 custom.o: ./custom_modules/custom.cpp $(MaBoSS)
-	$(COMPILE_COMMAND) $(INC) -c ./custom_modules/custom.cpp
-
-custom_main.o: ./custom_modules/custom_main.cpp $(MaBoSS)
-	$(COMPILE_COMMAND) $(INC) -c ./custom_modules/custom_main.cpp
+	$(COMPILE_COMMAND) $(INC)  -c ./custom_modules/custom.cpp
 
 # cleanup
 
@@ -220,9 +231,9 @@ reset:
 	rm -f ./custom_modules/*
 	touch ./custom_modules/empty.txt 
 	touch ALL_CITATIONS.txt 
+	touch ./core/PhysiCell_cell.cpp
 	rm ALL_CITATIONS.txt 
 	cp ./config/PhysiCell_settings-backup.xml ./config/PhysiCell_settings.xml 
-	rm -rf ./config/boolean_network/
 	rm -rf ./scripts
 
 MaBoSS-clean:
@@ -233,18 +244,15 @@ clean:
 	rm -f $(PROGRAM_NAME)*
 	
 data-cleanup:
-	rm -f *.mat
-	rm -f *.xml
-	rm -f *.svg
 	rm -rf ./output
 	mkdir ./output
 	touch ./output/empty.txt
 	
 # archival 
-
+	
 checkpoint: 
 	zip -r $$(date +%b_%d_%Y_%H%M).zip Makefile *.cpp *.h config/*.xml custom_modules/* 
-
+	
 zip:
 	zip -r latest.zip Makefile* *.cpp *.h BioFVM/* config/* core/* custom_modules/* matlab/* modules/* sample_projects/* 
 	cp latest.zip $$(date +%b_%d_%Y_%H%M).zip
@@ -264,3 +272,97 @@ unzip:
 untar: 
 	cp ./archives/latest.tar .
 	tar -xzf latest.tar
+
+# easier animation 
+
+FRAMERATE := 24
+OUTPUT := output
+
+jpeg: 
+	@magick identify -format "%h" $(OUTPUT)/initial.svg > __H.txt 
+	@magick identify -format "%w" $(OUTPUT)/initial.svg > __W.txt 
+	@expr 2 \* \( $$(grep . __H.txt) / 2 \) > __H1.txt 
+	@expr 2 \* \( $$(grep . __W.txt) / 2 \) > __W1.txt 
+	@echo "$$(grep . __W1.txt)!x$$(grep . __H1.txt)!" > __resize.txt 
+	@magick mogrify -format jpg -resize $$(grep . __resize.txt) $(OUTPUT)/s*.svg
+	rm -f __H*.txt __W*.txt __resize.txt 
+	
+gif: 
+	magick convert $(OUTPUT)/s*.svg $(OUTPUT)/out.gif 
+	 
+movie:
+	ffmpeg -r $(FRAMERATE) -f image2 -i $(OUTPUT)/snapshot%08d.jpg -vcodec libx264 -pix_fmt yuv420p -strict -2 -tune animation -crf 15 -acodec none $(OUTPUT)/out.mp4
+	
+# upgrade rules 
+
+SOURCE := PhysiCell_upgrade.zip 
+get-upgrade: 
+	@echo $$(curl https://raw.githubusercontent.com/MathCancer/PhysiCell/master/VERSION.txt) > VER.txt 
+	@echo https://github.com/MathCancer/PhysiCell/releases/download/$$(grep . VER.txt)/PhysiCell_V.$$(grep . VER.txt).zip > DL_FILE.txt 
+	rm -f VER.txt
+	$$(curl -L $$(grep . DL_FILE.txt) --output PhysiCell_upgrade.zip)
+	rm -f DL_FILE.txt 
+
+PhysiCell_upgrade.zip: 
+	make get-upgrade 
+
+upgrade: $(SOURCE)
+	unzip $(SOURCE) PhysiCell/VERSION.txt
+	mv -f PhysiCell/VERSION.txt . 
+	unzip $(SOURCE) PhysiCell/core/* 
+	cp -r PhysiCell/core/* core 
+	unzip $(SOURCE) PhysiCell/modules/* 
+	cp -r PhysiCell/modules/* modules 
+	unzip $(SOURCE) PhysiCell/sample_projects/* 
+	cp -r PhysiCell/sample_projects/* sample_projects 
+	unzip $(SOURCE) PhysiCell/BioFVM/* 
+	cp -r PhysiCell/BioFVM/* BioFVM
+	unzip $(SOURCE) PhysiCell/documentation/User_Guide.pdf
+	mv -f PhysiCell/documentation/User_Guide.pdf documentation
+	rm -f -r PhysiCell
+	rm -f $(SOURCE) 
+
+# use: make save PROJ=your_project_name
+PROJ := my_project
+
+save: 
+	echo "Saving project as $(PROJ) ... "
+	mkdir -p ./user_projects
+	mkdir -p ./user_projects/$(PROJ)
+	mkdir -p ./user_projects/$(PROJ)/custom_modules
+	mkdir -p ./user_projects/$(PROJ)/config 
+	cp main.cpp ./user_projects/$(PROJ)
+	cp Makefile ./user_projects/$(PROJ)
+	cp VERSION.txt ./user_projects/$(PROJ)
+	cp ./config/* ./user_projects/$(PROJ)/config
+	cp ./custom_modules/* ./user_projects/$(PROJ)/custom_modules
+
+load: 
+	echo "Loading project from $(PROJ) ... "
+	cp ./user_projects/$(PROJ)/main.cpp .
+	cp ./user_projects/$(PROJ)/Makefile .
+	cp ./user_projects/$(PROJ)/config/* ./config/ 
+	cp ./user_projects/$(PROJ)/custom_modules/* ./custom_modules/ 
+
+pack:
+	@echo " "
+	@echo "Preparing project $(PROJ) for sharing ... "
+	@echo " " 
+	cd ./user_projects && zip -r $(PROJ).zip $(PROJ)
+	@echo " "
+	@echo "Share ./user_projects/$(PROJ).zip ... "
+	@echo "Other users can unzip $(PROJ).zip in their ./user_projects, compile, and run."
+	@echo " " 
+
+unpack:
+	@echo " "
+	@echo "Preparing shared project $(PROJ).zip for use ... "
+	@echo " " 
+	cd ./user_projects && unzip $(PROJ).zip 
+	@echo " "
+	@echo "Load this project via make load PROJ=$(PROJ) ... "
+	@echo " " 	
+
+list-user-projects:
+	@echo "user projects::"
+	@cd ./user_projects && ls -dt1 * | grep . | sed 's!empty.txt!!'
