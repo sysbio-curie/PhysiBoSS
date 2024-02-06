@@ -431,7 +431,7 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 	
 	if(PhysiCell_settings.enable_substrate_plot == true && (*substrate_coloring_function) != NULL){
 
-		double legend_padding = 200.0; // I have to add a margin on the left to visualize the bar plot and the values
+		double legend_padding = 140.0; // I have to add a margin on the left to visualize the bar plot and the values
 
 		Write_SVG_start( os, plot_width + legend_padding, plot_height + top_margin );
 
@@ -492,11 +492,10 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
   
 	double half_voxel_size = voxel_size / 2.0; 
 	double normalizer = 78.539816339744831 / (voxel_size*voxel_size*voxel_size); 
-
-	// used for the legend
+	// used for the substrate 
 	double max_conc;
 	double min_conc;
- // color in the background ECM
+ 	// color in the background ECM
 	if(PhysiCell_settings.enable_substrate_plot == true && (*substrate_coloring_function) != NULL)
 	{
 		double dz_stroma = M.mesh.dz;
@@ -712,7 +711,8 @@ void SVG_plot( std::string filename , Microenvironment& M, double z_slice , doub
 	// draw a box around the plot window
 	Write_SVG_rect( os , 0 , top_margin, plot_width, plot_height , 0.002 * plot_height , "rgb(0,0,0)", "none" );
 
-	if(substrate_coloring_function != NULL){
+	if(PhysiCell_settings.enable_substrate_plot == true && (*substrate_coloring_function) != NULL)
+	{
 
 		// add legend for the substrate
 
