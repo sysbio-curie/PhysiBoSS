@@ -3,7 +3,9 @@ name: Tests Windows
 on:
   push:
   pull_request:
-    
+  release:
+    types: [created]
+        
 jobs:
   build:
 
@@ -116,19 +118,36 @@ jobs:
     - name: Build PhysiBoSS tutorial
       run: |
         make physiboss-tutorial
+        make clean
         python beta/setup_windows_dep.py
+        make Compile_MaBoSS
         make static
         ldd .\\project.exe
+        
     - name: Run PhysiBoSS tutorial
       run: |
         .\\project.exe config\\cell_cycle\\PhysiCell_settings_cell_cycle_2D.xml
+        
+    - name: Build project archive
+      run: |
+        rm -fr config/PhysiCell_settings-backup.xml
+        tar -zcvf tutorial-win.tar.gz project.exe *.dll Makefile main.cpp config/ custom_modules/
         
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: tutorial_binary_windows
         path: project.exe
-
+       
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: tutorial-win.tar.gz
+        asset_path: D:\a\PhysiBoSS\PhysiBoSS\tutorial-win.tar.gz
+        asset_content_type: application/gzip   
 
 
   build_physiboss_cancer_invasion:
@@ -150,16 +169,135 @@ jobs:
     - name: Build PhysiBoSS Cancer invasion
       run: |
         make physiboss-tutorial-invasion
+        make clean
         python beta/setup_windows_dep.py
+        make Compile_MaBoSS
         make static
         ldd .\\invasion_model.exe
     
     - name: Run PhysiBoSS cancer invasion
       run: |
         .\\invasion_model.exe config\\PhysiCell_settings_2D.xml    
-    
+        
+    - name: Build project archive
+      run: |
+        rm -fr config/PhysiCell_settings-backup.xml
+        tar -zcvf invasion_model-win.tar.gz invasion_model.exe *.dll Makefile main.cpp config/ custom_modules/
+
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: invasion_model_binary_windows
         path: invasion_model.exe
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: invasion_model-win.tar.gz
+        asset_path: D:\a\PhysiBoSS\PhysiBoSS\invasion_model-win.tar.gz
+        asset_content_type: application/gzip   
+
+  build_physiboss_template:
+
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        shell: msys2 {0}
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: mingw-w64-x86_64-binutils mingw-w64-x86_64-gcc mingw-w64-x86_64-headers-git mingw-w64-x86_64-gcc-libs mingw-w64-x86_64-libwinpthread-git mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-bzip2 mingw-w64-x86_64-python mingw-w64-x86_64-python-zstandard mingw-w64-x86_64-python-cffi make bison flex mingw-w64-x86_64-ca-certificates
+
+    - name: Build PhysiBoSS Template
+      run: |
+        make template_BM
+        make clean
+        python beta/setup_windows_dep.py
+        make Compile_MaBoSS
+        make static
+        ldd .\\template_BM.exe
+    
+    - name: Run PhysiBoSS model
+      run: |
+        .\\template_BM.exe
+        
+    - name: Build project archive
+      run: |
+        rm -fr config/PhysiCell_settings-backup.xml
+        tar -zcvf template_BM-win.tar.gz template_BM.exe *.dll Makefile main.cpp config/ custom_modules/
+
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: template_BM_binary_windows
+        path: template_BM.exe
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: template_BM-win.tar.gz
+        asset_path: D:\a\PhysiBoSS\PhysiBoSS\template_BM-win.tar.gz
+        asset_content_type: application/gzip   
+
+  build_physiboss_celllines:
+
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        shell: msys2 {0}
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: mingw-w64-x86_64-binutils mingw-w64-x86_64-gcc mingw-w64-x86_64-headers-git mingw-w64-x86_64-gcc-libs mingw-w64-x86_64-libwinpthread-git mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-bzip2 mingw-w64-x86_64-python mingw-w64-x86_64-python-zstandard mingw-w64-x86_64-python-cffi make bison flex mingw-w64-x86_64-ca-certificates
+
+    - name: Build PhysiBoSS Cell Lines
+      run: |
+        make physiboss-cell-lines-sample
+        make clean
+        python beta/setup_windows_dep.py
+        make Compile_MaBoSS
+        make static
+        ldd .\\PhysiBoSS_Cell_Lines.exe
+    
+    - name: Run PhysiBoSS model
+      run: |
+        .\\PhysiBoSS_Cell_Lines.exe
+        
+    - name: Build project archive
+      run: |
+        rm -fr config/PhysiCell_settings-backup.xml
+        tar -zcvf physiboss-cell-lines-win.tar.gz PhysiBoSS_Cell_Lines.exe *.dll Makefile main.cpp config/ custom_modules/
+
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: physiboss-cell-lines_binary_windows
+        path: PhysiBoSS_Cell_Lines.exe
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: physiboss-cell-lines-win.tar.gz
+        asset_path: D:\a\PhysiBoSS\PhysiBoSS\physiboss-cell-lines-win.tar.gz
+        asset_content_type: application/gzip   
+  
+  
