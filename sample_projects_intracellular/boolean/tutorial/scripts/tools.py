@@ -111,3 +111,29 @@ def compute_stg_counts(trajs, all_states):
                 stg_counts[state_ids[t_traj[j-1]], state_ids[t_state]] += 1
 
     return stg_counts, state_ids, ids_state
+
+def to_bits(state, nodes):
+    if state == "<nil>":
+        return tuple([0]*len(nodes))
+    bits = []
+    state_list = state.split(" -- ")
+    for node in nodes:
+        bits.append(1 if node in state_list else 0)
+    return tuple(bits)
+def to_istates(table, nodes):
+    istates = {}
+    for index, value in table.iloc[-1, :].items():
+        istates.update({to_bits(index, nodes): value})
+    return istates
+
+def change_input(nodes, istates, name, value):
+    new_istates = {}
+    for bits, proba in istates.items():
+        new_bits = list(bits)
+        new_bits[nodes.index(name)] = value
+        new_tuples = tuple(new_bits)
+        if new_tuples not in new_istates.keys():
+            new_istates[new_tuples] = proba
+        else:
+            new_istates[new_tuples] += proba   
+    return new_istates
