@@ -1,3 +1,10 @@
+Node CCR7_h {
+  logic = (CCR7_h);
+  rate_up = @logic ? $u_CCR7_h : 0;
+  rate_down = @logic ? 0 : $d_CCR7_h;
+}
+
+
 Node ATP {
   logic = (ATP);
   rate_up = @logic ? $u_ATP : 0;
@@ -35,7 +42,7 @@ Node Maturation {
 }
 
 Node Migration_2 {
-  logic = (Maturation & !Contact_2);
+  logic = (Maturation & !Contact_2) & !CCR7_h;
   rate_up = @logic ? $u_Migration_2 : 0;
   rate_down = @logic ? 0 : $d_Migration_2;
 }
