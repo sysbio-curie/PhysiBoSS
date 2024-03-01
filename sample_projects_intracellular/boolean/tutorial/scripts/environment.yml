@@ -1,0 +1,26 @@
+name: tutorial-notebooks
+channels:
+  - colomoto
+  - conda-forge
+  - defaults
+dependencies:
+  - pandas 
+  - matplotlib 
+  - python 
+  - scipy
+  - numpy
+  - jupyterlab
+  - maboss
+  - pymaboss
+  - ginsim
+  - pygraphviz
+  - graphviz
+  - pydot
+  - tqdm
+  - scipy
+  - scikit-learn
+  - seaborn
+  - pip
+  - pip:
+    - git+https://github.com/marcorusc/PhysiCOOL@a6b4c924a36bd59c543499746098041f35bfc21c
+    - pcdl[scverse]

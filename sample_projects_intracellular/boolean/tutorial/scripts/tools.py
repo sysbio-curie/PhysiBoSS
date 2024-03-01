@@ -60,7 +60,7 @@ def draw_graph_from_pandas(data, prog="neato"):
     edge_colors = [edge['weight'] for _, edge in G.edges.items()]
 
     pos = graphviz_layout(G, prog=prog)
-    plt.figure(figsize=(12,6), dpi=100)
+    fig = plt.figure(figsize=(12,6), dpi=100)
 
     nx.draw(G, pos, with_labels=True, edgelist=[], node_size=0)
     cmap = mpl.colors.ListedColormap(plt.cm.Blues(np.linspace(0.2, 1, 100)))
@@ -79,7 +79,7 @@ def draw_graph_from_pandas(data, prog="neato"):
 
     pc = mpl.collections.PatchCollection(edges, cmap=cmap)
     pc.set_array(edge_colors)
-    plt.colorbar(pc)
+    plt.colorbar(pc, ax=fig.axes[0])
     plt.show()
 
     
