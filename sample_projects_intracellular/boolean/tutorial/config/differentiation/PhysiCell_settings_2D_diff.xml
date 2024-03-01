@@ -898,6 +898,9 @@
                 <intracellular type="maboss">
                     <bnd_filename>config/differentiation/boolean_network/dendritic_cells.bnd</bnd_filename>
                     <cfg_filename>config/differentiation/boolean_network/dendritic_cells.cfg</cfg_filename>
+                    <initial_values>
+                        <initial_value intracellular_name="Maturation">1.0</initial_value>
+                    </initial_values>
                     <settings>
                         <intracellular_dt>6.0</intracellular_dt>
                         <time_stochasticity>0</time_stochasticity>
@@ -913,7 +916,7 @@
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
-                        <input physicell_name="contact with T0" intracellular_name="Contact_2">
+                        <input physicell_name="contact with T0" intracellular_name="Contact">
                             <settings>
                                 <action>activation</action>
                                 <threshold>0.8</threshold>
@@ -928,7 +931,7 @@
                                 <smoothing>30</smoothing>
                             </settings>
                         </input>
-                        <output physicell_name="chemotactic response to CCL21" intracellular_name="Migration_2">
+                        <output physicell_name="chemotactic response to CCL21" intracellular_name="Migration">
                             <settings>
                                 <action>activation</action>
                                 <value>1</value>
@@ -936,7 +939,7 @@
                                 <smoothing>0</smoothing>
                             </settings>
                         </output>
-                        <output physicell_name="migration bias" intracellular_name="Migration_2">
+                        <output physicell_name="migration bias" intracellular_name="Migration">
                             <settings>
                                 <action>activation</action>
                                 <value>1</value>
