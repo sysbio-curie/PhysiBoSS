@@ -109,7 +109,7 @@ jobs:
 
     - name: Run PhysiBoSS tutorial
       run: |
-        ./project config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project config/cell_cycle/PhysiCell_settings.xml
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
@@ -154,7 +154,7 @@ jobs:
 
     - name: Run PhysiBoSS tutorial
       run: |
-        ./project config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project config/cell_cycle/PhysiCell_settings.xml
         
     - name: Caching produced project binary 
       uses: actions/cache@v4
@@ -209,7 +209,7 @@ jobs:
     - name: Run PhysiBoSS tutorial
       run: |
         make physiboss-tutorial
-        ./project_macos_universal config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project_macos_universal config/cell_cycle/PhysiCell_settings.xml
         
     - name: Build project archive
       run: |
