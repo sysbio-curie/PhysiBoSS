@@ -105,7 +105,7 @@ jobs:
         
     - name: Run PhysiBoSS tutorial
       run: |
-        ./project config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project config/cell_cycle/PhysiCell_settings.xml
         
     - name: Build project archive
       run: |
@@ -126,7 +126,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: tutorial-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/tutorial-linux.tar.gz
+        asset_path: ${{ github.workspace }}/tutorial-linux.tar.gz
         asset_content_type: application/gzip   
         
   build_physiboss_cancer_invasion:
@@ -167,7 +167,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: invasion_model-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/invasion_model-linux.tar.gz
+        asset_path: ${{ github.workspace }}/invasion_model-linux.tar.gz
         asset_content_type: application/gzip
   
   build_physiboss_template:
@@ -183,22 +183,22 @@ jobs:
         make clean
         make Compile_MaBoSS
         make static STATIC_OPENMP=/usr/lib/gcc/x86_64-linux-gnu/11/libgomp.a
-        ldd template_BM
+        ldd project
         
     - name: Run PhysiBoSS model
       run: |
-        ./template_BM
+        ./project
         
     - name: Build project archive
       run: |
         rm -fr config/PhysiCell_settings-backup.xml
-        tar -zcvf template_BM-linux.tar.gz template_BM Makefile main.cpp config/ custom_modules/
+        tar -zcvf template_BM-linux.tar.gz project Makefile main.cpp config/ custom_modules/
 
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: template_BM_binary_linux
-        path: template_BM
+        path: project
 
         
     - uses: actions/upload-release-asset@v1
@@ -208,7 +208,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: template_BM-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/template_BM-linux.tar.gz
+        asset_path: ${{ github.workspace }}/template_BM-linux.tar.gz
         asset_content_type: application/gzip
         
     
@@ -251,5 +251,5 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: physiboss-cell-lines-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/physiboss-cell-lines-linux.tar.gz
+        asset_path: ${{ github.workspace }}/physiboss-cell-lines-linux.tar.gz
         asset_content_type: application/gzip

@@ -109,13 +109,13 @@ jobs:
 
     - name: Run PhysiBoSS tutorial
       run: |
-        ./project config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project config/cell_cycle/PhysiCell_settings.xml
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/project_macos13
+          ${{ github.workspace }}/project_macos13
         key: ${{ runner.os }}-macos13-project-${{ github.run_id }}
     
     - name: Look at the generated binary
@@ -131,7 +131,7 @@ jobs:
         path: project
 
   build_physiboss_tutorial_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -154,13 +154,13 @@ jobs:
 
     - name: Run PhysiBoSS tutorial
       run: |
-        ./project config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project config/cell_cycle/PhysiCell_settings.xml
         
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/project_macosm1
+          ${{ github.workspace }}/project_macosm1
         key: ${{ runner.os }}-macosm1-project-${{ github.run_id }}
      
     - name: Look at the generated binary
@@ -186,41 +186,41 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/project_macosm1
+          ${{ github.workspace }}/project_macosm1
         key: ${{ runner.os }}-macosm1-project-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/project_macos13
+          ${{ github.workspace }}/project_macos13
         key: ${{ runner.os }}-macos13-project-${{ github.run_id }}
     
     - name: Creating universal binary
       run: | 
-        lipo -create -output project_macos_universal project_macos13 project_macosm1
+        lipo -create -output project project_macos13 project_macosm1
 
     - name: Checking universal binary
       run: |
-        lipo -archs project_macos_universal
-        otool -L project_macos_universal
-        otool -l project_macos_universal
+        lipo -archs project
+        otool -L project
+        otool -l project
 
     - name: Run PhysiBoSS tutorial
       run: |
         make physiboss-tutorial
-        ./project_macos_universal config/cell_cycle/PhysiCell_settings_cell_cycle_2D.xml
+        ./project config/cell_cycle/PhysiCell_settings.xml
         
     - name: Build project archive
       run: |
         rm -fr config/PhysiCell_settings-backup.xml
-        tar -zcvf tutorial-macos.tar.gz project_macos_universal Makefile main.cpp config/ custom_modules/
+        tar -zcvf tutorial-macos.tar.gz project Makefile main.cpp config/ custom_modules/
 
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: tutorial_binary_macosx_universal
-        path: project_macos_universal
+        path: project
  
             
     - uses: actions/upload-release-asset@v1
@@ -230,7 +230,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: tutorial-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/tutorial-macos.tar.gz
+        asset_path: ${{ github.workspace }}/tutorial-macos.tar.gz
         asset_content_type: application/gzip     
     
   
@@ -259,7 +259,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/invasion_model_macos13
+          ${{ github.workspace }}/invasion_model_macos13
         key: ${{ runner.os }}-macos13-cancer_invasion-${{ github.run_id }}
     
     - name: Run PhysiBoSS cancer invasion model
@@ -279,7 +279,7 @@ jobs:
         path: invasion_model
 
   build_physiboss_cancer_invasion_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -308,7 +308,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/invasion_model_macosm1
+          ${{ github.workspace }}/invasion_model_macosm1
         key: ${{ runner.os }}-macosm1-cancer_invasion-${{ github.run_id }}
      
     - name: Look at the generated binary
@@ -334,41 +334,41 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/invasion_model_macosm1
+          ${{ github.workspace }}/invasion_model_macosm1
         key: ${{ runner.os }}-macosm1-cancer_invasion-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/invasion_model_macos13
+          ${{ github.workspace }}/invasion_model_macos13
         key: ${{ runner.os }}-macos13-cancer_invasion-${{ github.run_id }}
     
     - name: Creating universal binary
       run: | 
-        lipo -create -output invasion_model_macos_universal invasion_model_macos13 invasion_model_macosm1
+        lipo -create -output invasion_model invasion_model_macos13 invasion_model_macosm1
 
     - name: Checking universal binary
       run: |
-        lipo -archs invasion_model_macos_universal
-        otool -l invasion_model_macos_universal
-        otool -L invasion_model_macos_universal
+        lipo -archs invasion_model
+        otool -l invasion_model
+        otool -L invasion_model
         
     - name: Run PhysiBoSS cancer invasion
       run: |
         make physiboss-tutorial-invasion
-        ./invasion_model_macos_universal config/PhysiCell_settings_2D.xml
+        ./invasion_model config/PhysiCell_settings_2D.xml
         
     - name: Build project archive
       run: |
         rm -fr config/PhysiCell_settings-backup.xml
-        tar -zcvf invasion_model-macos.tar.gz invasion_model_macos_universal Makefile main.cpp config/ custom_modules/
+        tar -zcvf invasion_model-macos.tar.gz invasion_model Makefile main.cpp config/ custom_modules/
         
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: invasion_model_binary_macosx_universal
-        path: invasion_model_macos_universal
+        path: invasion_model
         
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -377,7 +377,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: invasion_model-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/invasion_model-macos.tar.gz
+        asset_path: ${{ github.workspace }}/invasion_model-macos.tar.gz
         asset_content_type: application/gzip     
       
   build_physiboss_template_macos:
@@ -397,33 +397,33 @@ jobs:
         make clean
         make Compile_MaBoSS PHYSICELL_CPP=g++-11
         make PHYSICELL_CPP=g++-11 static
-        cp template_BM template_BM_macos13
+        cp project project_macos13
 
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/template_BM_macos13
+          ${{ github.workspace }}/project_macos13
         key: ${{ runner.os }}-macos13-template-${{ github.run_id }}
     
     - name: Run PhysiBoSS model
       run: |
-        ./template_BM
+        ./project
         
     - name: Look at the generated binary
       run: |
-        otool -L template_BM
-        otool -l template_BM
-        lipo -archs template_BM      
+        otool -L project
+        otool -l project
+        lipo -archs project      
     
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: template_BM_macos13
-        path: template_BM
+        path: project
 
   build_physiboss_template_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -441,30 +441,30 @@ jobs:
         make clean
         make Compile_MaBoSS PHYSICELL_CPP=g++-11
         make PHYSICELL_CPP=g++-11 static
-        cp template_BM template_BM_macosm1
+        cp project project_macosm1
 
     - name: Run PhysiBoSS model
       run: |
-        ./template_BM
+        ./project
         
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/template_BM_macosm1
+          ${{ github.workspace }}/project_macosm1
         key: ${{ runner.os }}-macosm1-template-${{ github.run_id }}
       
     - name: Look at the generated binary
       run: |
-        otool -L template_BM
-        otool -l template_BM
-        lipo -archs template_BM 
+        otool -L project
+        otool -l project
+        lipo -archs project
       
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: template_BM_binary_macos_m1
-        path: template_BM
+        path: project
         
   build_physiboss_template_universal:
     runs-on: macos-latest
@@ -477,41 +477,41 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/template_BM_macosm1
+          ${{ github.workspace }}/project_macosm1
         key: ${{ runner.os }}-macosm1-template-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/template_BM_macos13
+          ${{ github.workspace }}/project_macos13
         key: ${{ runner.os }}-macos13-template-${{ github.run_id }}
     
     - name: Creating universal binary
       run: | 
-        lipo -create -output template_BM_macos_universal template_BM_macos13 template_BM_macosm1
+        lipo -create -output project project_macos13 project_macosm1
 
     - name: Checking universal binary
       run: |
-        lipo -archs template_BM_macos_universal
-        otool -l template_BM_macos_universal
-        otool -L template_BM_macos_universal
+        lipo -archs project
+        otool -l project
+        otool -L project
         
     - name: Run PhysiBoSS model
       run: |
         make template_BM
-        ./template_BM_macos_universal
+        ./project
         
     - name: Build project archive
       run: |
         rm -fr config/PhysiCell_settings-backup.xml
-        tar -zcvf template_BM-macos.tar.gz template_BM_macos_universal Makefile main.cpp config/ custom_modules/
+        tar -zcvf template_BM-macos.tar.gz project Makefile main.cpp config/ custom_modules/
         
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: template_BM_binary_macosx_universal
-        path: template_BM_macos_universal
+        path: project
         
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -520,7 +520,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: template_BM-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/template_BM-macos.tar.gz
+        asset_path: ${{ github.workspace }}/template_BM-macos.tar.gz
         asset_content_type: application/gzip
         
         
@@ -547,7 +547,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macos13
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macos13
         key: ${{ runner.os }}-macos13-celllines-${{ github.run_id }}
     
     - name: Run PhysiBoSS model
@@ -567,7 +567,7 @@ jobs:
         path: PhysiBoSS_Cell_Lines
 
   build_physiboss_celllines_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -595,7 +595,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macosm1
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macosm1
         key: ${{ runner.os }}-macosm1-celllines-${{ github.run_id }}
       
     - name: Look at the generated binary
@@ -621,41 +621,41 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /opt/actions-runner/_work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macosm1
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macosm1
         key: ${{ runner.os }}-macosm1-celllines-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macos13
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macos13
         key: ${{ runner.os }}-macos13-celllines-${{ github.run_id }}
     
     - name: Creating universal binary
       run: | 
-        lipo -create -output PhysiBoSS_Cell_Lines_macos_universal PhysiBoSS_Cell_Lines_macos13 PhysiBoSS_Cell_Lines_macosm1
+        lipo -create -output PhysiBoSS_Cell_Lines PhysiBoSS_Cell_Lines_macos13 PhysiBoSS_Cell_Lines_macosm1
 
     - name: Checking universal binary
       run: |
-        lipo -archs PhysiBoSS_Cell_Lines_macos_universal
-        otool -l PhysiBoSS_Cell_Lines_macos_universal
-        otool -L PhysiBoSS_Cell_Lines_macos_universal
+        lipo -archs PhysiBoSS_Cell_Lines
+        otool -l PhysiBoSS_Cell_Lines
+        otool -L PhysiBoSS_Cell_Lines
         
     - name: Run PhysiBoSS model
       run: |
         make physiboss-cell-lines-sample
-        ./PhysiBoSS_Cell_Lines_macos_universal
+        ./PhysiBoSS_Cell_Lines
         
     - name: Build project archive
       run: |
         rm -fr config/PhysiCell_settings-backup.xml
-        tar -zcvf physiboss-cell-lines-macos.tar.gz PhysiBoSS_Cell_Lines_macos_universal Makefile main.cpp config/ custom_modules/
+        tar -zcvf physiboss-cell-lines-macos.tar.gz PhysiBoSS_Cell_Lines Makefile main.cpp config/ custom_modules/
         
     - name: Save artifacts
       uses: actions/upload-artifact@v4
       with: 
         name: physiboss-cell-lines_macos_universal
-        path: PhysiBoSS_Cell_Lines_macos_universal
+        path: PhysiBoSS_Cell_Lines
         
     - uses: actions/upload-release-asset@v1
       if: github.event_name == 'release'
@@ -664,5 +664,5 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: physiboss-cell-lines-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/physiboss-cell-lines-macos.tar.gz
+        asset_path: ${{ github.workspace }}/physiboss-cell-lines-macos.tar.gz
         asset_content_type: application/gzip
