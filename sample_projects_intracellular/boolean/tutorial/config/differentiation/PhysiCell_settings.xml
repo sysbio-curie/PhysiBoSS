@@ -245,63 +245,63 @@
                         <input physicell_name="contact with dendritic_cell" intracellular_name="IL1_In">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="MHCII_b1">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="MHCII_b2">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="IL12_In">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="IL6_In">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="CD80">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="CD4">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="IL23_In">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
                         <input physicell_name="contact with dendritic_cell" intracellular_name="PIP2">
                             <settings>
                                 <action>activation</action>
-                                <threshold>1.0</threshold>
+                                <threshold>1</threshold>
                                 <smoothing>0</smoothing>
                             </settings>
                         </input>
@@ -829,9 +829,9 @@
                     <detachment_rate units="1/min">0.0</detachment_rate>
                 </mechanics>
                 <motility>
-                    <speed units="micron/min">0.8</speed>
+                    <speed units="micron/min">0</speed>
                     <persistence_time units="min">1</persistence_time>
-                    <migration_bias units="dimensionless">0.0</migration_bias>
+                    <migration_bias units="dimensionless">0.8</migration_bias>
                     <options>
                         <enabled>true</enabled>
                         <use_2D>true</use_2D>
@@ -919,16 +919,8 @@
                         <input physicell_name="contact with T0" intracellular_name="Contact">
                             <settings>
                                 <action>activation</action>
-                                <threshold>0.8</threshold>
+                                <threshold>0.5</threshold>
                                 <smoothing>0</smoothing>
-                            </settings>
-                        </input>
-                        <input physicell_name="CCL21" intracellular_name="CCR7_h">
-                            <settings>
-                                <action>activation</action>
-                                <threshold>2.0</threshold>
-                                <inact_threshold>1.0</inact_threshold>
-                                <smoothing>30</smoothing>
                             </settings>
                         </input>
                         <output physicell_name="chemotactic response to CCL21" intracellular_name="Migration">
@@ -939,11 +931,11 @@
                                 <smoothing>0</smoothing>
                             </settings>
                         </output>
-                        <output physicell_name="migration bias" intracellular_name="Migration">
+                        <output physicell_name="migration speed" intracellular_name="Migration">
                             <settings>
                                 <action>activation</action>
-                                <value>1</value>
-                                <base_value>0</base_value>
+                                <value>1.0</value>
+                                <base_value>0.0</base_value>
                                 <smoothing>0</smoothing>
                             </settings>
                         </output>
@@ -979,7 +971,7 @@
                     <model code="101" name="necrosis">
                         <death_rate units="1/min">0.0</death_rate>
                         <phase_transition_rates units="1/min">
-                            <rate start_index="0" end_index="1" fixed_duration="false">9e9</rate>
+                            <rate start_index="0" end_index="1" fixed_duration="false">9000000000.0</rate>
                             <rate start_index="1" end_index="2" fixed_duration="true">1.15741e-05</rate>
                         </phase_transition_rates>
                         <parameters>
