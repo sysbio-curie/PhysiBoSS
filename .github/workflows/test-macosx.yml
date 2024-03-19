@@ -115,7 +115,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/project_macos13
+          ${{ github.workspace }}/project_macos13
         key: ${{ runner.os }}-macos13-project-${{ github.run_id }}
     
     - name: Look at the generated binary
@@ -160,7 +160,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/project_macosm1
+          ${{ github.workspace }}/project_macosm1
         key: ${{ runner.os }}-macosm1-project-${{ github.run_id }}
      
     - name: Look at the generated binary
@@ -186,14 +186,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/project_macosm1
+          ${{ github.workspace }}/project_macosm1
         key: ${{ runner.os }}-macosm1-project-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/project_macos13
+          ${{ github.workspace }}/project_macos13
         key: ${{ runner.os }}-macos13-project-${{ github.run_id }}
     
     - name: Creating universal binary
@@ -230,7 +230,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: tutorial-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/tutorial-macos.tar.gz
+        asset_path: ${{ github.workspace }}/tutorial-macos.tar.gz
         asset_content_type: application/gzip     
     
   
@@ -259,7 +259,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/invasion_model_macos13
+          ${{ github.workspace }}/invasion_model_macos13
         key: ${{ runner.os }}-macos13-cancer_invasion-${{ github.run_id }}
     
     - name: Run PhysiBoSS cancer invasion model
@@ -308,7 +308,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/invasion_model_macosm1
+          ${{ github.workspace }}/invasion_model_macosm1
         key: ${{ runner.os }}-macosm1-cancer_invasion-${{ github.run_id }}
      
     - name: Look at the generated binary
@@ -334,14 +334,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/invasion_model_macosm1
+          ${{ github.workspace }}/invasion_model_macosm1
         key: ${{ runner.os }}-macosm1-cancer_invasion-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/invasion_model_macos13
+          ${{ github.workspace }}/invasion_model_macos13
         key: ${{ runner.os }}-macos13-cancer_invasion-${{ github.run_id }}
     
     - name: Creating universal binary
@@ -377,7 +377,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: invasion_model-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/invasion_model-macos.tar.gz
+        asset_path: ${{ github.workspace }}/invasion_model-macos.tar.gz
         asset_content_type: application/gzip     
       
   build_physiboss_template_macos:
@@ -403,7 +403,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/template_BM_macos13
+          ${{ github.workspace }}/template_BM_macos13
         key: ${{ runner.os }}-macos13-template-${{ github.run_id }}
     
     - name: Run PhysiBoSS model
@@ -451,7 +451,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/template_BM_macosm1
+          ${{ github.workspace }}/template_BM_macosm1
         key: ${{ runner.os }}-macosm1-template-${{ github.run_id }}
       
     - name: Look at the generated binary
@@ -477,14 +477,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/template_BM_macosm1
+          ${{ github.workspace }}/template_BM_macosm1
         key: ${{ runner.os }}-macosm1-template-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/template_BM_macos13
+          ${{ github.workspace }}/template_BM_macos13
         key: ${{ runner.os }}-macos13-template-${{ github.run_id }}
     
     - name: Creating universal binary
@@ -520,7 +520,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: template_BM-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/template_BM-macos.tar.gz
+        asset_path: ${{ github.workspace }}/template_BM-macos.tar.gz
         asset_content_type: application/gzip
         
         
@@ -547,7 +547,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macos13
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macos13
         key: ${{ runner.os }}-macos13-celllines-${{ github.run_id }}
     
     - name: Run PhysiBoSS model
@@ -595,7 +595,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macosm1
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macosm1
         key: ${{ runner.os }}-macosm1-celllines-${{ github.run_id }}
       
     - name: Look at the generated binary
@@ -621,14 +621,14 @@ jobs:
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/_work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macosm1
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macosm1
         key: ${{ runner.os }}-macosm1-celllines-${{ github.run_id }}
     
     - name: Caching produced project binary 
       uses: actions/cache@v4
       with:
         path: |
-          /Users/runner/work/PhysiBoSS/PhysiBoSS/PhysiBoSS_Cell_Lines_macos13
+          ${{ github.workspace }}/PhysiBoSS_Cell_Lines_macos13
         key: ${{ runner.os }}-macos13-celllines-${{ github.run_id }}
     
     - name: Creating universal binary
@@ -664,5 +664,5 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: physiboss-cell-lines-macos.tar.gz
-        asset_path: /Users/runner/work/PhysiBoSS/PhysiBoSS/physiboss-cell-lines-macos.tar.gz
+        asset_path: ${{ github.workspace }}/physiboss-cell-lines-macos.tar.gz
         asset_content_type: application/gzip

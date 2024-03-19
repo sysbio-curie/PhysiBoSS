@@ -146,7 +146,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: tutorial-win.tar.gz
-        asset_path: D:\a\PhysiBoSS\PhysiBoSS\tutorial-win.tar.gz
+        asset_path: ${{ github.workspace }}\tutorial-win.tar.gz
         asset_content_type: application/gzip   
 
 
@@ -197,7 +197,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: invasion_model-win.tar.gz
-        asset_path: D:\a\PhysiBoSS\PhysiBoSS\invasion_model-win.tar.gz
+        asset_path: ${{ github.workspace }}\invasion_model-win.tar.gz
         asset_content_type: application/gzip   
 
   build_physiboss_template:
@@ -247,7 +247,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: template_BM-win.tar.gz
-        asset_path: D:\a\PhysiBoSS\PhysiBoSS\template_BM-win.tar.gz
+        asset_path: ${{ github.workspace }}\template_BM-win.tar.gz
         asset_content_type: application/gzip   
 
   build_physiboss_celllines:
@@ -297,7 +297,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: physiboss-cell-lines-win.tar.gz
-        asset_path: D:\a\PhysiBoSS\PhysiBoSS\physiboss-cell-lines-win.tar.gz
+        asset_path: ${{ github.workspace }}\physiboss-cell-lines-win.tar.gz
         asset_content_type: application/gzip   
   
   

@@ -126,7 +126,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: tutorial-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/tutorial-linux.tar.gz
+        asset_path: ${{ github.workspace }}/tutorial-linux.tar.gz
         asset_content_type: application/gzip   
         
   build_physiboss_cancer_invasion:
@@ -167,7 +167,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: invasion_model-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/invasion_model-linux.tar.gz
+        asset_path: ${{ github.workspace }}/invasion_model-linux.tar.gz
         asset_content_type: application/gzip
   
   build_physiboss_template:
@@ -208,7 +208,7 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: template_BM-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/template_BM-linux.tar.gz
+        asset_path: ${{ github.workspace }}/template_BM-linux.tar.gz
         asset_content_type: application/gzip
         
     
@@ -251,5 +251,5 @@ jobs:
       with:
         upload_url: ${{ github.event.release.upload_url }}
         asset_name: physiboss-cell-lines-linux.tar.gz
-        asset_path: /home/runner/work/PhysiBoSS/PhysiBoSS/physiboss-cell-lines-linux.tar.gz
+        asset_path: ${{ github.workspace }}/physiboss-cell-lines-linux.tar.gz
         asset_content_type: application/gzip
