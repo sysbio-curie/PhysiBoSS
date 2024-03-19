@@ -131,7 +131,7 @@ jobs:
         path: project
 
   build_physiboss_tutorial_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -279,7 +279,7 @@ jobs:
         path: invasion_model
 
   build_physiboss_cancer_invasion_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -423,7 +423,7 @@ jobs:
         path: template_BM
 
   build_physiboss_template_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
@@ -567,7 +567,7 @@ jobs:
         path: PhysiBoSS_Cell_Lines
 
   build_physiboss_celllines_m1:
-    runs-on: flyci-macos-large-latest-m1
+    runs-on: macos-14
 
     steps:
     - uses: actions/checkout@v4
