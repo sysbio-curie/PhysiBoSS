@@ -246,6 +246,15 @@ physiboss-tutorial:
 	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
 	cp -r ./sample_projects_intracellular/boolean/tutorial/config/* ./config/
 
+physiboss-cellcycle:
+	cp ./sample_projects_intracellular/boolean/cell_cycle/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/boolean/cell_cycle/main.cpp ./main.cpp 
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/boolean/cell_cycle/Makefile .
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml 
+	cp -r ./sample_projects_intracellular/boolean/cell_cycle/config/* ./config/
+
 physiboss-tutorial-invasion:
 	cp ./sample_projects_intracellular/boolean/cancer_invasion/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
