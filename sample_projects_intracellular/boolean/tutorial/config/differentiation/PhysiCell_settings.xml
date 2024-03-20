@@ -909,7 +909,7 @@
                         <inheritance global="False" />
                     </settings>
                     <mapping>
-                        <input physicell_name="CCL21" intracellular_name="CCR7">
+                        <input physicell_name="CCL21" intracellular_name="CCL21">
                             <settings>
                                 <action>activation</action>
                                 <threshold>1.0</threshold>
