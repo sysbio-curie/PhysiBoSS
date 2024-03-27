@@ -11,6 +11,10 @@ ifdef PHYSICELL_CPP
 	CC := $(PHYSICELL_CPP)
 endif
 
+ifndef STATIC_OPENMP
+	STATIC_OPENMP = -fopenmp
+endif
+
 ARCH := native # best auto-tuning
 # ARCH := core2 # a reasonably safe default for most CPUs since 2007
 # ARCH := corei7
@@ -44,7 +48,9 @@ else
 	endif
 endif
 
-COMPILE_COMMAND := $(CC) $(CFLAGS) 
+CFLAGS_LINK := $(shell echo $(CFLAGS) | sed -e "s/-fopenmp//g")
+COMPILE_COMMAND := $(CC) $(CFLAGS) $(EXTRA_FLAGS)
+LINK_COMMAND := $(CC) $(CFLAGS_LINK) $(EXTRA_FLAGS)
 
 BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
 BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
@@ -75,6 +81,9 @@ name:
 	@echo ""
 	@echo "Executable name is" $(PROGRAM_NAME)
 	@echo ""
+
+static: main.cpp $(ALL_OBJECTS)
+	$(LINK_COMMAND) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp -static-libgcc -static-libstdc++ $(STATIC_OPENMP)
 
 # PhysiCell core components	
 

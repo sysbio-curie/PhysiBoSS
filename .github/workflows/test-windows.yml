@@ -200,6 +200,56 @@ jobs:
         asset_path: ${{ github.workspace }}\invasion_model-win.tar.gz
         asset_content_type: application/gzip   
 
+  build_physicell_template:
+
+    runs-on: windows-latest
+    
+    defaults:
+      run:
+        shell: msys2 {0}
+        
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: msys2/setup-msys2@v2
+      with:
+        update: true
+        install: mingw-w64-x86_64-binutils mingw-w64-x86_64-gcc mingw-w64-x86_64-headers-git mingw-w64-x86_64-gcc-libs mingw-w64-x86_64-libwinpthread-git mingw-w64-x86_64-lapack mingw-w64-x86_64-openblas mingw-w64-x86_64-libxml2 mingw-w64-x86_64-bzip2 mingw-w64-x86_64-python mingw-w64-x86_64-python-zstandard mingw-w64-x86_64-python-cffi make bison flex mingw-w64-x86_64-ca-certificates
+
+    - name: Build PhysiBoSS Template
+      run: |
+        make template
+        make clean
+        python beta/setup_windows_dep.py
+        make static
+        ldd .\\project.exe
+    
+    - name: Run PhysiBoSS model
+      run: |
+        .\\project.exe
+        
+    - name: Build project archive
+      run: |
+        rm -fr config/PhysiCell_settings-backup.xml
+        tar -zcvf template-win.tar.gz project.exe *.dll Makefile main.cpp config/ custom_modules/
+
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: template_binary_windows
+        path: project.exe
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: template-win.tar.gz
+        asset_path: ${{ github.workspace }}\template-win.tar.gz
+        asset_content_type: application/gzip   
+      
+        
   build_physiboss_template:
 
     runs-on: windows-latest

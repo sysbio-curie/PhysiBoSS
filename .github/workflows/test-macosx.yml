@@ -379,7 +379,149 @@ jobs:
         asset_name: invasion_model-macos.tar.gz
         asset_path: ${{ github.workspace }}/invasion_model-macos.tar.gz
         asset_content_type: application/gzip     
+
+  build_physicell_template_macos:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run : brew install gcc@11
       
+    - name: Build PhysiCell template
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=11
+        make template
+        make clean
+        make PHYSICELL_CPP=g++-11 static
+        cp project project_macos13
+
+    - name: Caching produced project binary 
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/project_macos13
+        key: ${{ runner.os }}-macos13-template-${{ github.run_id }}
+    
+    - name: Run PhysiCell model
+      run: |
+        ./project
+        
+    - name: Look at the generated binary
+      run: |
+        otool -L project
+        otool -l project
+        lipo -archs project      
+    
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: template_macos13
+        path: project
+
+  build_physicell_template_m1:
+    runs-on: macos-14
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Downgrade XCODE to 14.3.1
+      run: sudo xcode-select -switch /Applications/Xcode_14.3.1.app   
+      
+    - name: Install dependencies
+      run : brew install gcc@11
+      
+    - name: Build PhysiBoSS template
+      run: |
+        export MACOSX_DEPLOYMENT_TARGET=11
+        make template
+        make clean
+        make PHYSICELL_CPP=g++-11 static
+        cp project project_macosm1
+
+    - name: Run PhysiCell model
+      run: |
+        ./project
+        
+    - name: Caching produced project binary 
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/project_macosm1
+        key: ${{ runner.os }}-macosm1-template-${{ github.run_id }}
+      
+    - name: Look at the generated binary
+      run: |
+        otool -L project
+        otool -l project
+        lipo -archs project
+      
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: template_binary_macos_m1
+        path: project
+        
+  build_physicell_template_universal:
+    runs-on: macos-latest
+    needs: [build_physicell_template_m1, build_physicell_template_macos]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Caching produced project binary 
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/project_macosm1
+        key: ${{ runner.os }}-macosm1-template-${{ github.run_id }}
+    
+    - name: Caching produced project binary 
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/project_macos13
+        key: ${{ runner.os }}-macos13-template-${{ github.run_id }}
+    
+    - name: Creating universal binary
+      run: | 
+        lipo -create -output project project_macos13 project_macosm1
+
+    - name: Checking universal binary
+      run: |
+        lipo -archs project
+        otool -l project
+        otool -L project
+        
+    - name: Run PhysiCell model
+      run: |
+        make template
+        ./project
+        
+    - name: Build project archive
+      run: |
+        rm -fr config/PhysiCell_settings-backup.xml
+        tar -zcvf template-macos.tar.gz project Makefile main.cpp config/ custom_modules/
+        
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with: 
+        name: template_binary_macosx_universal
+        path: project
+        
+    - uses: actions/upload-release-asset@v1
+      if: github.event_name == 'release'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_name: template-macos.tar.gz
+        asset_path: ${{ github.workspace }}/template-macos.tar.gz
+        asset_content_type: application/gzip
+        
+
   build_physiboss_template_macos:
 
     runs-on: macos-latest
