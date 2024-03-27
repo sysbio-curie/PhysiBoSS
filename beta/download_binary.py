@@ -17,6 +17,7 @@ list_models = {
     "tutorial": "https://github.com/sysbio-curie/PhysiBoSS/releases/download/" + physiboss_version + "/", 
     "invasion_model": "https://github.com/sysbio-curie/PhysiBoSS/releases/download/" + physiboss_version + "/", 
     "template_BM": "https://github.com/sysbio-curie/PhysiBoSS/releases/download/" + physiboss_version + "/", 
+    "template": "https://github.com/sysbio-curie/PhysiBoSS/releases/download/" + physiboss_version + "/", 
     "physiboss-cell-lines": "https://github.com/sysbio-curie/PhysiBoSS/releases/download/" + physiboss_version + "/"     
 }
 
