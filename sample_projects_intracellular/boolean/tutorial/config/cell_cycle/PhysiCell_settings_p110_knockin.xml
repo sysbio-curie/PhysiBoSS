@@ -13,7 +13,7 @@
     </domain>
 
     <overall>
-        <max_time units="min">7200</max_time>
+        <max_time units="min">2880</max_time>
         <time_units>min</time_units>
         <space_units>micron</space_units>
         
@@ -223,7 +223,6 @@
                         <start_time>0.0</start_time>
                         <inheritance global="True" />
                         <mutations>
-                            <mutation intracellular_name="PI3K_H">1.0</mutation>
                             <mutation intracellular_name="p110_H">1.0</mutation>
                         </mutations>
                     </settings>
@@ -272,7 +271,7 @@
     <initial_conditions>
         <cell_positions type="csv" enabled="true">
             <folder>./config/cell_cycle</folder>
-            <filename>more_cells.csv</filename>
+            <filename>cells.csv</filename>
         </cell_positions>
     </initial_conditions>
     

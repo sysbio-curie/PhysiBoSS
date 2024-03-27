@@ -13,6 +13,7 @@ dependencies:
   - maboss
   - pymaboss
   - ginsim
+  - ginsim-python
   - pygraphviz
   - graphviz
   - pydot

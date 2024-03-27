@@ -120,17 +120,19 @@ def to_bits(state, nodes):
     for node in nodes:
         bits.append(1 if node in state_list else 0)
     return tuple(bits)
+    
 def to_istates(table, nodes):
     istates = {}
     for index, value in table.iloc[-1, :].items():
         istates.update({to_bits(index, nodes): value})
     return istates
 
-def change_input(nodes, istates, name, value):
+def change_inputs(nodes, istates, name_value):
     new_istates = {}
     for bits, proba in istates.items():
         new_bits = list(bits)
-        new_bits[nodes.index(name)] = value
+        for name in name_value:
+            new_bits[nodes.index(name)] = name_value[name]
         new_tuples = tuple(new_bits)
         if new_tuples not in new_istates.keys():
             new_istates[new_tuples] = proba
