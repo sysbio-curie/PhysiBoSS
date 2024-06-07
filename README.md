@@ -12,6 +12,12 @@ PhysiBoSS 2.0 is a redesign and reimplementation of PhysiBoSS ([doi:10.1093/bioi
 
 **Reference paper doi:** [10.1038/s41540-023-00314-4](https://doi.org/10.1038/s41540-023-00314-4)
 
+A tutorial, explaining the new functionalities of PhysiBoSS, including the automated input/output mapping, and more, is available as a preprint. Check it out !
+
+**Tutorial paper**: [https://arxiv.org/abs/2406.18371](https://arxiv.org/abs/2406.18371)
+
+**Tutorial project folder**: [here](https://github.com/PhysiBoSS/PhysiBoSS/tree/master/sample_projects_intracellular/boolean/tutorial)
+
 ### How to run a PhysiBoSS sample_project inside PhysiCell:
 ~~~bash
 git clone https://github.com/PhysiBoSS/PhysiBoSS.git
