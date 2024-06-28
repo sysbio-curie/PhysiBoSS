@@ -1,4 +1,4 @@
-<img align="right" height="200" src="https://github.com/sysbio-curie/MaBoSS-env-2.0/assets/22156824/b1b9a843-a203-42e6-8f8f-1acd2e2f5285">
+<img align="right" height="200" src="https://github.com/sysbio-curie/MaBoSS/assets/22156824/b1b9a843-a203-42e6-8f8f-1acd2e2f5285">
 
 # PhysiBoSS 2: a sustainable integration of stochastic Boolean and agent-based modelling frameworks
 **Version:** 2.2.2
