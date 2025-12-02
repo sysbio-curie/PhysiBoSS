@@ -3475,7 +3475,7 @@ void Cell::remove_self_from_attackers( void )
 	#pragma omp parallel for
 	for (int j=0; j < all_cells->size(); j++) 
 	{
-		if (j != index && (*all_cells)[j]->phenotype.cell_interactions.pAttackTarget != NULL && (*all_cells)[j]->phenotype.cell_interactions.pAttackTarget == this) {
+		if (j != index && (*all_cells)[j]->phenotype.cell_interactions.pAttackTarget == this) {
 			(*all_cells)[j]->phenotype.cell_interactions.pAttackTarget = NULL;
 		}
 	}
