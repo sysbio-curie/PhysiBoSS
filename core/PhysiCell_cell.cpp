@@ -3436,9 +3436,26 @@ void Cell::remove_self_from_all_neighbors( void )
 				pN->state.neighbors.erase( SearchResult ); 
 			}
 			else
-			{ /* future error message */  }
+			{ std::cout << "Warning: attempted to remove a cell from a neighbor's list of neighbors, but it was not found." << std::endl; }
 	}
 
+	// This is a bit of a ugly hack, we need to find the origin of that bug  
+	for ( int i = 0; i < all_cells->size(); i++ )
+	{ 
+		Cell* pC = (*all_cells)[i];
+		if (pC != this)
+		{
+			auto SearchResult = std::find( 
+			pC->state.neighbors.begin(),pC->state.neighbors.end(),this );
+			if ( SearchResult != pC->state.neighbors.end() )
+			{
+				std::cout << "Cell " << pC->ID << " still has cell " << this->ID << " as a neighbor!" << std::endl; 
+				pC->state.neighbors.erase( SearchResult ); 
+			}
+		}
+	}
+	
+	
 	return; 
 }
 
