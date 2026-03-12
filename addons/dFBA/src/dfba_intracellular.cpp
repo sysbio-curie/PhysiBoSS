@@ -549,19 +549,20 @@ void dFBAIntracellular::update(){
     // Only run dFBA if current_time >= next_dfba_run
     dFBASolution solution = this->sbml_model.optimize();
     //next_dfba_run = PhysiCell::PhysiCell_globals.current_time + dfba_time_step;
-    if (solution.status == "infeasible"){
-        //std::cout << "I'm dead from the metabolic point of view" << std::endl;
-        this->flag_for_death = true;
-        this->current_growth_rate = 0.0;
+    if (solution.status == "optimal"){
+        this->current_growth_rate = solution.getObjectiveValue();
+        this->flag_for_death = false;
     }
     else if(solution.status == "unknown"){
         std::cout << "ERROR: Unknown status for the FBA problem!" << std::endl;
         exit(1);
     }
-    else{
-        this->current_growth_rate = solution.getObjectiveValue();
-        this->flag_for_death = false;
+    else {
+        //std::cout << "I'm dead from the metabolic point of view" << std::endl;
+        this->flag_for_death = true;
+        this->current_growth_rate = 0.0;
     }
+    
 }
 
 void dFBAIntracellular::update_dfba_outputs(PhysiCell::Cell* pCell, PhysiCell::Phenotype& phenotype, double dt )

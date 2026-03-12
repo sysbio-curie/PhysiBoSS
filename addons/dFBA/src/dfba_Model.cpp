@@ -482,7 +482,7 @@ void dFBAModel::initProblem()
     int n_cols = this->getNumReactions();
 
     this->handler = new CoinMessageHandler(nullptr);
-    std::cout << "Initilizing LP problem n=" << n_rows << std::endl;
+    // std::cout << "Initilizing LP problem n=" << n_rows << std::endl;
     this->handler->setLogLevel(0);
     this->problem.passInMessageHandler(this->handler);
 
