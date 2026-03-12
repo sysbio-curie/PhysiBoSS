@@ -12,9 +12,10 @@ from matplotlib.collections import LineCollection
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
 
 from utils import safe_divide, create_plot_title #, concentric_ring_areas
+from metrics import safe_kruskal
 
 def plot_cell_positions(data, wells_plot, time_frames_plot, plot_lims, df_droplet_boundary_all=None, hue_var='Channel', hue_order=None, position_var_unit='[µm]', 
-                        cmap='tab10', legend=True, legend_outside=True, custom_title=False, **kwargs):
+                        cmap='tab10', legend=True, legend_outside=True, custom_title=False, time_index_var='Time Index', **kwargs):
     """
     Plot cell positions for given wells and time frames.
     
@@ -32,12 +33,14 @@ def plot_cell_positions(data, wells_plot, time_frames_plot, plot_lims, df_drople
     - legend_outside: Whether to place legend outside the plot.
     """
     # Set position variables and check existence
-    position_vars = ['Position X '+position_var_unit, 'Position Y '+position_var_unit]
+    pos_var_x = "Position X" + (" " + position_var_unit if position_var_unit else "")
+    pos_var_y = "Position Y" + (" " + position_var_unit if position_var_unit else "")
+    position_vars = [pos_var_x, pos_var_y]
     for colname in position_vars + [hue_var]:
         if colname not in data.columns:
             raise ValueError(f"Missing required column: {colname}")
-    if 'Time Index' not in data.columns:
-        raise ValueError("Missing required column: 'Time Index'")
+    if time_index_var not in data.columns:
+        raise ValueError(f"Missing required column: '{time_index_var}'. Please provide the correct column name for time frames in the data.")
 
     fig, axs = plt.subplots(len(time_frames_plot), len(wells_plot), figsize=(len(wells_plot) * 5, len(time_frames_plot) * 5))
     for row_i in range(len(wells_plot)):
@@ -56,7 +59,7 @@ def plot_cell_positions(data, wells_plot, time_frames_plot, plot_lims, df_drople
                 ax_plot = axs[row_j, row_i]
             
             ## Filter data
-            filt = (data['Well']==well) & (data['Time Index']==time_frames_plot[row_j])
+            filt = (data['Well']==well) & (data[time_index_var]==time_frames_plot[row_j])
             if len(data.loc[filt])==0:
                 print(f"No data for {well} at Time Index {time_frames_plot[row_j]}")
                 continue
@@ -595,14 +598,16 @@ def plot_graphs_vs_time(data, group_var, group_order, y_var, x_var='Time [hr]', 
     return fig, axs
 
 ## Timelapse data (tracks)
-def plot_tracks(data, hue_var, plot_lims=None, plot_relative=False, position_var_unit='[µm]', trackid_var='TrackID2', time_var='Time Index',
+def plot_tracks(data, hue_var, plot_lims=None, plot_relative=False, position_vars=['Position X', 'Position Y'], trackid_var='TrackID2', time_var='Time Index',
                 color_by='initial_time', plot_dot=False, dot_size=36, alpha=1, title=None, cmap=None, legend=True, legend_outside=False, 
                 boundary_pts=None, ax=None, **kwargs):
     """
     Plot cell tracks for an individual image.
 
     Args:
-        data: Cell track data in the form of a DataFrame containing the columns 'TrackID2', 'Time', 'Position X', 'Position Y', 'x_rel', 'y_rel'.
+        data: Cell track data in the form of a DataFrame containing the columns 'TrackID2', 'Time', position variables (e.g., 'Position X', 'Position Y'), and the hue variable for coloring.
+        hue_var: Column name for coloring the tracks (e.g., 'Channel').
+        plot_lims: Dictionary with plot limits (xmin, xmax, ymin, ymax).
         plot_relative: If True, plot relative positions.
         alpha: Transparency of the tracks.
         color_by: 'initial_time' or 'final_time' to color the tracks.
@@ -619,36 +624,14 @@ def plot_tracks(data, hue_var, plot_lims=None, plot_relative=False, position_var
     Raises:
         Exception: If the input data does not contain the necessary columns.
     """
+    # Check if necessary columns exist
     for colname in [trackid_var, time_var]:
         if colname not in data.columns:
             raise Exception("The input data does not contain the necessary columns. Missing column: ", colname) 
-    
-    # Determine plot variables
-    if plot_relative:
-        x_var = 'Position X_rel'
-        y_var = 'Position Y_rel'
-        #z_var = 'Position Z_rel'
-    else:
-        x_var = 'Position X '+position_var_unit
-        y_var = 'Position Y '+position_var_unit
-        #z_var = 'Position Z'
-        
+    x_var = position_vars[0]
+    y_var = position_vars[1]
     if x_var not in data.columns or y_var not in data.columns:
         raise Exception("The input data does not contain the necessary columns. Missing column: ", x_var, " or ", y_var)
-    # elif position_var=='Position':
-    #     x_var = 'Position X'
-    #     y_var = 'Position Y'
-    #     #z_var = 'Position Z'
-    # elif position_var=='Position raw':
-    #     x_var = 'Position X raw'
-    #     y_var = 'Position Y raw'
-    #     #z_var = 'Position Z raw'
-    # elif position_var=='Position rescaled':
-    #     x_var = 'Position X rescaled'
-    #     y_var = 'Position Y rescaled'
-    #     #z_var = 'Position Z rescaled'
-    # else:
-    #    raise Exception(f"position_var = {position_var} is invalid! Specify which position variable to plot! ")
     
     # Sort data points
     if 'T_start' in data.columns:
@@ -659,7 +642,7 @@ def plot_tracks(data, hue_var, plot_lims=None, plot_relative=False, position_var
     # Define color map
     # cmap can be either a list or a dictionary
     hue_var_list = df_sorted[hue_var].unique()
-    hue_var_list.sort() # sort hue variables, optional
+    # hue_var_list.sort() # sort hue variables, optional
     if cmap:
         if isinstance(cmap, dict):
             colormap = cmap
@@ -738,8 +721,8 @@ def plot_tracks(data, hue_var, plot_lims=None, plot_relative=False, position_var
     
     # Set labels
     ax.set_title(title, loc='center')
-    ax.set_xlabel('x (µm)')
-    ax.set_ylabel('y (µm)')
+    ax.set_xlabel(position_vars[0])
+    ax.set_ylabel(position_vars[1])
     
     # Invert the y-axis
     ax.invert_yaxis()
@@ -747,13 +730,13 @@ def plot_tracks(data, hue_var, plot_lims=None, plot_relative=False, position_var
 ## Plot cell tracks
 def plot_tracks_grouped(data, group_var, hue_var, n_rows, n_cols, plot_lims, *, groups=None, trackid_var='TrackID2', time_var='Time Index',
                         plot_relative=False, alpha=0.8, color_by='initial_time', plot_dot=False, dot_size=36, cmap=None, 
-                        legend=True, legend_outside=False, boundaries_all=None,
+                        legend=True, legend_outside=False, boundaries_all=None, 
                         figsize=(5,5), position_var_unit='[µm]', save_fname=None, **kwargs):
     """
     Plot cell tracks for each well in a grouped data set.
 
     Args:
-        data: Input data formatted as pandas dataframe with columns 'TrackID2', 'Time', 'Position X', 'Position Y', 'x_rel', 'y_rel' as well as the columns specified in 'hue_var'.
+        data: Input data formatted as pandas dataframe with columns 'TrackID2', 'Time', position variables, as well as the columns specified in 'hue_var'.
         hue_var: Name of the column of 'data' to color the tracks by.
         plot_lims: Dictionary with keys 'xmin', 'xmax', 'ymin', 'ymax' for the plot limits.
         n_rows: Number of rows of subplots.
@@ -790,8 +773,17 @@ def plot_tracks_grouped(data, group_var, hue_var, n_rows, n_cols, plot_lims, *, 
     else: 
         if data.shape[0]==0:
             raise ValueError("Input data is empty!")
+        # Specify position variable names
+        if not plot_relative:
+            pos_var_x = "Position X" + (" " + position_var_unit if position_var_unit else "")
+            pos_var_y = "Position Y" + (" " + position_var_unit if position_var_unit else "")
+        else:
+            pos_var_x = "Position X_rel"
+            pos_var_y = "Position Y_rel"
+        position_vars = [pos_var_x, pos_var_y]
+
         # Check required columns
-        required_columns = [trackid_var, time_var, 'Position X '+position_var_unit, 'Position Y '+position_var_unit, hue_var, group_var]
+        required_columns = [trackid_var, time_var, pos_var_x, pos_var_y, hue_var, group_var]
         for col in required_columns:
             if col not in data.columns:
                 raise Exception(f"Input data is missing required column: {col}")
@@ -814,10 +806,11 @@ def plot_tracks_grouped(data, group_var, hue_var, n_rows, n_cols, plot_lims, *, 
                 boundary_pts = boundaries_all[plot_group]
             data_well = grouped_data.get_group(plot_group).copy()
             # Plot title - customize as needed
-            plot_title=f"{plot_group}"
+            #plot_title=f"{plot_group}"
+            plot_title=f"{plot_group} \n Number of cells: {len(data_well['TrackID2'].unique())}"  
             # plot_title=f"{plot_group} - T-cells: {data_well.iloc[0]['Condition']}"  
             # plot_title=f"{plot_group} - T-cells: {data_well.iloc[0]['Condition']} \n Droplet: {data_well.iloc[0]['Droplet_content']}"  
-            plot_tracks(data_well, hue_var=hue_var, plot_lims=plot_lims, plot_relative=plot_relative, position_var_unit=position_var_unit, 
+            plot_tracks(data_well, hue_var=hue_var, plot_lims=plot_lims, plot_relative=plot_relative, position_vars=position_vars, 
                         trackid_var=trackid_var, time_var=time_var, color_by=color_by, plot_dot=plot_dot, dot_size=dot_size, 
                         alpha=alpha, title=plot_title, cmap=cmap, legend=legend, legend_outside=legend_outside, 
                         boundary_pts=boundary_pts, ax=axs[i], **kwargs)
@@ -839,7 +832,7 @@ def plot_tracks_grouped(data, group_var, hue_var, n_rows, n_cols, plot_lims, *, 
 
 ## Plot grouped data
 def plot_grouped_data(data, plot_var, group_var, hue_var, *, plot_type='box', group_order=None, hue_order=None, 
-                      n_cols=4, palette=None, rotation=None, xlims=None, ylims=None, xlabel=None, ylabel=None, yscale=None, 
+                      n_cols=4, palette=None, rotation=None, xlims=None, ylims=None, xlabel=None, ylabel=None, xscale=None, yscale=None, 
                       title=None, figsize=(4, 4), legend_outside=False, title_vars=None, save_fig_name=None, s_test=None, 
                       x_var=None, t_norm=1, image_roi='in_droplet', # optional parameters for specific plots
                       **kwargs):
@@ -862,6 +855,7 @@ def plot_grouped_data(data, plot_var, group_var, hue_var, *, plot_type='box', gr
         ylims: Tuple of the y-axis limits.
         xlabel: Label for the x-axis.
         ylabel: Label for the y-axis.
+        xscale: Scale for the x-axis.
         yscale: Scale for the y-axis.
         title: Title of the plot.
         figsize: Size of the figure.
@@ -903,7 +897,7 @@ def plot_grouped_data(data, plot_var, group_var, hue_var, *, plot_type='box', gr
             raise Exception(f"Given plot_var {column_to_check} is not a column in data. Available columns: {data.columns.tolist()}")
     
     # Check if x_var is well-defined for scatter and scatter_line
-    if plot_type in ['scatter', 'scatter_line', 'lineplot', 'time_avg_mean_sem', 'infiltration_count', 'infiltration_fraction', 'infiltration_rate', 'msd']:
+    if plot_type in ['scatter', 'scatter_line', 'lineplot', 'time_avg_mean_sem', 'infiltration_count', 'infiltration_fraction', 'infiltration_rate']:
         if not x_var:
             raise Exception(f"x_var cannot be None for plot_type {plot_type}!")
         if x_var not in data.columns:
@@ -1100,11 +1094,6 @@ def plot_grouped_data(data, plot_var, group_var, hue_var, *, plot_type='box', gr
             df2 = df_group_in_droplet.groupby([hue_var, x_var]).size()
             df_fraction = (df2/df1).reset_index(name='Infiltration_fraction')
             sns.lineplot(df_fraction, x=x_var, y='Infiltration_fraction', hue=hue_var, palette=palette, hue_order=df_group_hue_order, ax=ax_plot, **kwargs)
-        elif plot_type=='msd':
-            sns.lineplot(data=df_group, x=x_var, y='msd', hue=hue_var, palette=palette, hue_order=df_group_hue_order, ax=ax_plot, **kwargs)
-            ax_plot.set_title(group_name, loc='center')
-            ax_plot.set_xscale('log')
-            ax_plot.set_yscale('log')
 
         # Plot customization
         if title is None:
@@ -1122,6 +1111,8 @@ def plot_grouped_data(data, plot_var, group_var, hue_var, *, plot_type='box', gr
             ax_plot.set_ylim(ylims[0], ylims[1])
         if xlims:
             ax_plot.set_xlim(xlims[0], xlims[1])
+        if xscale=='log':
+            ax_plot.set_xscale('log', nonpositive='clip')
         if yscale=='log':
             ax_plot.set_yscale('log', nonpositive='clip')
         if rotation:
@@ -1141,7 +1132,8 @@ def plot_grouped_data(data, plot_var, group_var, hue_var, *, plot_type='box', gr
         # Perform significance test on group data, comparing subgroups labelled by hue_var
         if s_test=='kruskal-wallis':
             print(f"Kruskal-Wallis test on {plot_var}, for the data set {group_name}, comparing groups labelled by {hue_var}.")
-            print( stats.kruskal(*[list(group) for _, group in df_group.groupby(hue_var)[plot_var]]) )
+            result = safe_kruskal(df_group, hue_var, plot_var)
+            print(result)
         elif s_test=='anova':
             print(f"ANOVA test on {plot_var}, for the data set {group_name}, comparing groups labelled by {hue_var}.")
             print( stats.f_oneway(*[list(group) for _, group in df_group.groupby(hue_var)[plot_var]]) )
@@ -1317,5 +1309,3 @@ def scale_data_plot_heatmap(
         # plt.show()
 
     return df_stats
-
-
