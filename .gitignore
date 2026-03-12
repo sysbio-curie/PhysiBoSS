@@ -40,3 +40,5 @@ output/cells.csv
 .vscode/
 
 notebooks/
+
+**/.ipynb_checkpoints/
