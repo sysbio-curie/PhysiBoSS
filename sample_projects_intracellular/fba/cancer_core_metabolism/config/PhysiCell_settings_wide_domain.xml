@@ -693,7 +693,7 @@
           <damage_repair_rate units="1/min">0.0</damage_repair_rate>
         </cell_integrity>
         <intracellular type="dfba">
-	  <settings>
+	        <settings>
             <sbml_filename>config/MCF7_Zielinski_2017_core_trimmed.sbml</sbml_filename>
             <intracellular_dt units="min">0.01</intracellular_dt>
           </settings>
@@ -821,38 +821,38 @@
             <objective_reaction>R_biomass_reaction</objective_reaction>
           </growth_model>
           <death_model enabled="true">
-            <death_type units="g/ml">necrosis</death_type>
-            <death_trigger_flux units="1/min">R_ATPM</death_trigger_flux>
-            <death_flux_threshold>1.07</death_flux_threshold>
-            <death_rate_increase>1.67e-07</death_rate_increase>
+            <death_type units="unitless">necrosis</death_type>
+            <death_trigger_flux units="unitless">R_ATPM</death_trigger_flux>
+            <death_flux_threshold units="1/min">1.07</death_flux_threshold>
+            <death_rate_increase units="unitless">1.67e-07</death_rate_increase>
           </death_model>
         </intracellular>
       </phenotype>
       <custom_data>
         <growth_rate units="1/min">0.0</growth_rate>
-        <R_EX_arg_L_e conserved="false" units="mM/min" description="">0.0</R_EX_arg_L_e>
-        <R_EX_asn_L_e conserved="false" units="mM/min" description="">0.0</R_EX_asn_L_e>
-        <R_EX_asp_L_e conserved="false" units="mM/min" description="">0.0</R_EX_asp_L_e>
-        <R_EX_chol_e conserved="false" units="mM/min" description="">0.0</R_EX_chol_e>
-        <R_EX_co2_e conserved="false" units="mM/min" description="">0.0</R_EX_co2_e>
-        <R_EX_glc_e conserved="false" units="mM/min" description="">0.0</R_EX_glc_e>
-        <R_EX_gln_L_e conserved="false" units="mM/min" description="">0.0</R_EX_gln_L_e>
-        <R_EX_glu_L_e conserved="false" units="mM/min" description="">0.0</R_EX_glu_L_e>
-        <R_EX_gly_e conserved="false" units="mM/min" description="">0.0</R_EX_gly_e>
-        <R_EX_ile_L_e conserved="false" units="mM/min" description="">0.0</R_EX_ile_L_e>
-        <R_EX_lac_L_e conserved="false" units="mM/min" description="">0.0</R_EX_lac_L_e>
-        <R_EX_leu_L_e conserved="false" units="mM/min" description="">0.0</R_EX_leu_L_e>
-        <R_EX_lys_L_e conserved="false" units="mM/min" description="">0.0</R_EX_lys_L_e>
-        <R_EX_nh4_e conserved="false" units="mM/min" description="">0.0</R_EX_nh4_e>
-        <R_EX_o2_e conserved="false" units="mM/min" description="">0.0</R_EX_o2_e>
-        <R_EX_orn_e conserved="false" units="mM/min" description="">0.0</R_EX_orn_e>
-        <R_EX_phe_L_e conserved="false" units="mM/min" description="">0.0</R_EX_phe_L_e>
-        <R_EX_pi_e conserved="false" units="mM/min" description="">0.0</R_EX_pi_e>
-        <R_EX_ser_L_e conserved="false" units="mM/min" description="">0.0</R_EX_ser_L_e>
-        <R_EX_thr_L_e conserved="false" units="mM/min" description="">0.0</R_EX_thr_L_e>
-        <R_EX_trp_L_e conserved="false" units="mM/min" description="">0.0</R_EX_trp_L_e>
-        <R_EX_tyr_L_e conserved="false" units="mM/min" description="">0.0</R_EX_tyr_L_e>
-        <R_EX_val_L_e conserved="false" units="mM/min" description="">0.0</R_EX_val_L_e>
+        <R_EX_arg_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_arg_L_e>
+        <R_EX_asn_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_asn_L_e>
+        <R_EX_asp_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_asp_L_e>
+        <R_EX_chol_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_chol_e>
+        <R_EX_co2_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_co2_e>
+        <R_EX_glc_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_glc_e>
+        <R_EX_gln_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_gln_L_e>
+        <R_EX_glu_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_glu_L_e>
+        <R_EX_gly_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_gly_e>
+        <R_EX_ile_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_ile_L_e>
+        <R_EX_lac_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_lac_L_e>
+        <R_EX_leu_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_leu_L_e>
+        <R_EX_lys_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_lys_L_e>
+        <R_EX_nh4_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_nh4_e>
+        <R_EX_o2_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_o2_e>
+        <R_EX_orn_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_orn_e>
+        <R_EX_phe_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_phe_L_e>
+        <R_EX_pi_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_pi_e>
+        <R_EX_ser_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_ser_L_e>
+        <R_EX_thr_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_thr_L_e>
+        <R_EX_trp_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_trp_L_e>
+        <R_EX_tyr_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_tyr_L_e>
+        <R_EX_val_L_e conserved="false" units="mmol/g DW cell/min" description="FBA exchange flux">0.0</R_EX_val_L_e>
       </custom_data>
       <initial_parameter_distributions enabled="false">
           </initial_parameter_distributions>
