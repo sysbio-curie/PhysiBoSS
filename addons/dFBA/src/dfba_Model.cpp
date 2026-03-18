@@ -380,7 +380,7 @@ void dFBAModel::readSBMLModel(const char* sbmlFileName)
         Reaction* sbml_reaction = listOfReactions->get(i);
 
         dFBAReaction* reaction = new dFBAReaction(sbml_reaction->getId());
-        std::cout << "Adding reaction with ID: " << reaction->getId() << std::endl;
+        // std::cout << "Adding reaction with ID: " << reaction->getId() << std::endl;
         reaction->setName(sbml_reaction->getName());
 
         FbcReactionPlugin* rxnFbc = static_cast<FbcReactionPlugin*> (sbml_reaction->getPlugin("fbc"));
@@ -549,7 +549,7 @@ void dFBAModel::initProblem()
 void dFBAModel::initModel(const char* sbmlFileName)
 {
     this->readSBMLModel(sbmlFileName);
-    std::cout << "SBML model correctly loeaded: " << sbmlFileName << std::endl;
+    std::cout << "SBML model correctly loaded: " << sbmlFileName << std::endl;
     this->initProblem();
 }
 
