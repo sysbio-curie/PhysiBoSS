@@ -77,7 +77,7 @@ list-projects:
 	@echo "                 asymmetric-division-sample immune-function-sample episode-sample"
 	@echo ""
 	@echo "Sample intracellular projects: template_BM ode-energy-sample physiboss-cell-lines-sample"
-	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion"
+	@echo "                 cancer-metabolism-sample physiboss-tutorial physiboss-tutorial-invasion bacterial-colony"
 	@echo ""
 	
 template:
@@ -312,6 +312,17 @@ cancer-core-metabolism:
 	mkdir ./scripts/
 	cp ./sample_projects_intracellular/fba/cancer_core_metabolism/scripts/* ./scripts/
 	
+bacterial-colony:
+	cp ./sample_projects_intracellular/fba/bacterial_colony/custom_modules/* ./custom_modules/
+	touch main.cpp && cp main.cpp main-backup.cpp
+	cp ./sample_projects_intracellular/fba/bacterial_colony/main.cpp ./main.cpp
+	cp Makefile Makefile-backup
+	cp ./sample_projects_intracellular/fba/bacterial_colony/Makefile ./
+	cp ./config/PhysiCell_settings.xml ./config/PhysiCell_settings-backup.xml
+	cp ./sample_projects_intracellular/fba/bacterial_colony/config/* ./config/
+		mkdir ./scripts/
+	cp ./sample_projects_intracellular/fba/bacterial_colony/scripts/* ./scripts/
+
 template_BM:
 	cp ./sample_projects_intracellular/boolean/template_BM/custom_modules/* ./custom_modules/
 	touch main.cpp && cp main.cpp main-backup.cpp
