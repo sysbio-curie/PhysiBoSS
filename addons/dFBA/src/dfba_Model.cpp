@@ -16,7 +16,6 @@ dFBAModel::dFBAModel()
 {
     this->id = "none";
     this->is_initialized = false;
-    this->handler = NULL;
     this->solution.status = "none";
 }
 
@@ -27,8 +26,6 @@ dFBAModel::~dFBAModel() {
     for(dFBAMetabolite* met: this->metabolites)
         delete met;
 
-    if (this->handler != nullptr)
-        delete handler;
 }
 
 dFBAModel::dFBAModel(const dFBAModel& copy) {
@@ -53,17 +50,11 @@ dFBAModel::dFBAModel(const dFBAModel& copy) {
     // Copy solution (assuming it can be copied by value)
     this->solution = copy.solution;
 
-    // Handle ClpSimplex problem copying (depends on how `ClpSimplex` needs to be cloned)
+    // Re-initialize HiGHS problem for the copy
     if (copy.is_initialized) {
         this->initProblem();
     }
 
-    // Copy message handler
-    if (copy.handler != nullptr) {
-        this->handler = new CoinMessageHandler(*copy.handler);
-    } else {
-        this->handler = nullptr;
-    }
 }
 
 
@@ -83,10 +74,6 @@ dFBAModel& dFBAModel::operator=(const dFBAModel& other) {
         delete rxn;
     }
     reactions.clear();
-
-    if (handler != nullptr) {
-        delete handler;
-    }
 
     // Copy primitive members
     this->id = other.id;
@@ -109,17 +96,9 @@ dFBAModel& dFBAModel::operator=(const dFBAModel& other) {
     // Copy solution (assuming it can be copied by value)
     this->solution = other.solution;
 
-    // Handle ClpSimplex problem copying
+    // Re-initialize HiGHS problem
     if (other.is_initialized) {
         this->initProblem(); 
-        this->is_initialized = true;
-    }
-
-    // Copy message handler
-    if (other.handler != nullptr) {
-        this->handler = new CoinMessageHandler(*other.handler);
-    } else {
-        this->handler = nullptr;
     }
 
     return *this;
@@ -136,15 +115,10 @@ void dFBAModel::clear(){
     this->reactionsIndexer.clear();
     this->metaboliteIndexer.clear();
     this->solution.clear();
-    this->problem = ClpSimplex();
-    this->handler = NULL;
+    highs.~Highs();
+    new (&highs) Highs();
 
     return;
-}
-
-const ClpSimplex* dFBAModel::getLpModel() const
-{
-    return &this->problem;
 }
 
 const int dFBAModel::getNumReactions()
@@ -232,7 +206,7 @@ void dFBAModel::setReactionUpperBound(std::string rId, double upperBound)
     {
         rxn->setUpperBound(upperBound);
         int colIdx = this->reactionsIndexer[rId];
-        this->problem.setColumnUpper(colIdx, upperBound);
+        this->highs.changeColBounds(colIdx, rxn->getLowerBound(), upperBound);
     }
     else{
         std::cerr << "Reaction with ID " << rId << " not found in the model." << std::endl;
@@ -257,7 +231,7 @@ void dFBAModel::setReactionLowerBound(std::string rId, double lowerBound)
     {
         rxn->setLowerBound(lowerBound);
         int colIdx = this->reactionsIndexer[rId];
-        this->problem.setColumnLower(colIdx, lowerBound);
+        this->highs.changeColBounds(colIdx, lowerBound , rxn->getUpperBound());
     }
     else{
         std::cerr << "Reaction with ID " << rId << " not found in the model." << std::endl;
@@ -476,75 +450,95 @@ void dFBAModel::readSBMLModel(const char* sbmlFileName)
     delete document;
 }
 
-void dFBAModel::initProblem()
-{
+void dFBAModel::initProblem() {
     int n_rows = this->getNumMetabolites();
     int n_cols = this->getNumReactions();
 
-    this->handler = new CoinMessageHandler(nullptr);
-    // std::cout << "Initilizing LP problem n=" << n_rows << std::endl;
-    this->handler->setLogLevel(0);
-    this->problem.passInMessageHandler(this->handler);
+    // Silence HiGHS output
+    highs.setOptionValue("output_flag", false);
 
-    CoinPackedMatrix matrix;
-    matrix.setDimensions(n_rows, 0);
+    std::cout << "Initializing LP problem with " << n_rows << " constraints and "
+              << n_cols << " variables." << std::endl;
 
-    double* row_lb = new double[n_rows]; //the row lower bounds
-    double* row_ub = new double[n_rows]; //the row upper bounds
-    double* col_lb = new double[n_cols]; //the column lower bounds
-    double* col_ub = new double[n_cols]; //the column upper bounds
-    double* objective = new double[n_cols]; //the objective coefficients
+    // Prepare LP data vectors.
+    std::vector<double> row_lower(n_rows, 0.0);  // All row lower bounds set to 0.
+    std::vector<double> row_upper(n_rows, 0.0);    // All row upper bounds set to 0.
+    std::vector<double> col_lower(n_cols);
+    std::vector<double> col_upper(n_cols);
+    std::vector<double> col_cost(n_cols);
 
-    for(int i=0; i< n_rows; i++)
-    {
-        row_lb[i] = 0;
-        row_ub[i] = 0;
+    // To process reactions in order, create a vector indexed by column index.
+    std::vector<dFBAReaction*> reactions_by_index(n_cols, nullptr);
+    for (dFBAReaction* rxn : this->reactions) {
+      int col_idx = this->reactionsIndexer[rxn->getId()];
+      reactions_by_index[col_idx] = rxn;
     }
-    for(dFBAReaction* rxn: this->reactions)
-    {
-        int col_idx = this->reactionsIndexer[rxn->getId()];
-        //std::cout << "Adding reaction " << rxn->getId() << " with index: " << this->reactionsIndexer[rxn->getId()] << " to the LP problem" << std::endl;
-        col_lb[col_idx] = rxn->getLowerBound();
-        col_ub[col_idx] = rxn->getUpperBound();
-        objective[col_idx] = rxn->getObjectiveCoefficient();
-
-        const std::map<std::string, double>& metabolites = rxn->getMetabolites();
-
-        CoinPackedVector col;
-        for (auto it = metabolites.begin(); it != metabolites.end(); ++it) {
-            const std::string& metId = it->first;  // Get metabolite ID
-            double stoich_coeff = it->second;
-
-            // Use the metabolite ID to get the index from metaboliteIndexer
-            auto idx_it = this->metaboliteIndexer.find(metId);
-            if (idx_it != this->metaboliteIndexer.end()) {
-                int row_idx = idx_it->second;
-                col.insert(row_idx, stoich_coeff);
-            }
+  
+    // Prepare the packed column-wise matrix data.
+    std::vector<int> a_start(n_cols + 1, 0); // a_start[0] must be zero.
+    std::vector<int> a_index;      // Row indices for nonzeros.
+    std::vector<double> a_value;   // Nonzero values.
+  
+    // Loop over each reaction (column).
+    for (int j = 0; j < n_cols; j++) {
+      dFBAReaction* rxn = reactions_by_index[j];
+      // Set column bounds and objective coefficients.
+      col_lower[j] = rxn->getLowerBound();
+      col_upper[j] = rxn->getUpperBound();
+      col_cost[j]  = rxn->getObjectiveCoefficient();
+  
+      // Record starting index for column j.
+      a_start[j] = a_index.size();
+      // For each metabolite in the reaction, add the nonzero entry.
+      const std::map<std::string, double>& mets = rxn->getMetabolites();
+      for (auto it = mets.begin(); it != mets.end(); ++it) {
+        auto idx_it = this->metaboliteIndexer.find(it->first);
+        if (idx_it != this->metaboliteIndexer.end()) {
+          int row_idx = idx_it->second;
+          a_index.push_back(row_idx);
+          a_value.push_back(it->second);
         }
-        matrix.appendCol(col);
+      }
+    }
+    // Final entry: total number of nonzeros.
+    a_start[n_cols] = a_index.size();
+
+    // Build the HighsModel.
+    HighsModel model;
+    model.lp_.num_col_ = n_cols;
+    model.lp_.num_row_ = n_rows;
+    model.lp_.sense_ = ObjSense::kMaximize;
+    model.lp_.offset_ = 0.0;
+    model.lp_.col_cost_ = col_cost;
+    model.lp_.col_lower_ = col_lower;
+    model.lp_.col_upper_ = col_upper;
+    model.lp_.row_lower_ = row_lower;
+    model.lp_.row_upper_ = row_upper;
+
+    // Set the constraint matrix data.
+    model.lp_.a_matrix_.format_ = MatrixFormat::kColwise;
+    model.lp_.a_matrix_.start_ = a_start;
+    model.lp_.a_matrix_.index_ = a_index;
+    model.lp_.a_matrix_.value_ = a_value;
+
+    // Pass the model to HiGHS.
+    HighsStatus status = highs.passModel(model);
+    if (status != HighsStatus::kOk) {
+      std::cerr << "Error passing LP model to HiGHS" << std::endl;
     }
 
-    this->problem.loadProblem(matrix, col_lb, col_ub, objective, row_lb, row_ub);
-    this->problem.setOptimizationDirection(-1);
+    // Set solver options
+    highs.setOptionValue("primal_feasibility_tolerance", 1e-7);
+    highs.setOptionValue("dual_feasibility_tolerance", 1e-7);
+    highs.setOptionValue("simplex_iteration_limit", 10000);
 
-    this->problem.setPerturbation(50); // 50 is a standard default for perturbation. It means that the perturbation is always applied. 100 is the default value (automatic)
-
-    delete[] col_lb;
-    delete[] col_ub;
-    delete[] row_lb;
-    delete[] row_ub;
-    delete[] objective;
-
-    this->problem.setPrimalTolerance(1e-7);
-    this->problem.setDualTolerance(1e-7);
-    this->problem.scaling(3);
-    this->problem.setMaximumIterations(10000);
-    this->problem.setLogLevel(0);
-    this->problem.initialSolve();
+    // Perform initial solve
+    highs.run();
 
     this->is_initialized = true;
-}
+  }
+  
+
 
 void dFBAModel::initModel(const char* sbmlFileName)
 {
@@ -555,61 +549,50 @@ void dFBAModel::initModel(const char* sbmlFileName)
 
 void dFBAModel::writeProblem(const char *filename)
 {
-    this->problem.writeLp(filename);
+    highs.writeModel(filename); // if such a function exists
 }
 
 dFBASolution dFBAModel::optimize()
 {
-
-    this->problem.dual();
-/*     // If Dual fails, try Primal (more robust from scratch) --> if numerical issue occurs, try primal to make sure the cell is really dead
-    if (this->problem.status() != 0) { 
-        this->problem.primal();
-    } */
-    bool isOptimal = problem.isProvenOptimal();
+    // Solve the model using HiGHS
+    HighsStatus run_status = highs.run();
 
     solution.fluxes.clear();
 
+    // Get model status
+    HighsModelStatus model_status = highs.getModelStatus();
     std::string status;
-    switch (this->problem.status()) {
-        case 0:
-            status = "optimal";
-            break;
-        case 1:
-        case 4:
-            status = "infeasible";
-            break;
-        default:
-            status = "unknown";
-            std::cerr << "Solver returned unknown status code: " << this->problem.status() << std::endl;
-            break;
+    bool isOptimal = (model_status == HighsModelStatus::kOptimal);
+
+    if (isOptimal) {
+        status = "optimal";
+    } else if (model_status == HighsModelStatus::kInfeasible) {
+        status = "infeasible";
+    } else {
+        status = "unknown";
+        std::cerr << "Solver returned status: " << highs.modelStatusToString(model_status) << std::endl;
     }
 
     if (isOptimal)
     {
-        const double *columnPrimal = this->problem.getColSolution();
+        const HighsSolution& sol = highs.getSolution();
+        double fopt = highs.getInfo().objective_function_value;
 
-        double fopt =  problem.getObjValue();
-
-        for(dFBAReaction* reaction: this->reactions)
+        for (dFBAReaction* reaction : this->reactions)
         {
             int column_idx = this->reactionsIndexer[reaction->getId()];
-            double flux = columnPrimal[column_idx];
+            double flux = sol.col_value[column_idx];
             solution.fluxes[reaction->getId()] = flux;
             reaction->setFluxValue(flux);
         }
 
         solution.objective_value = fopt;
         solution.status = status;
-
-        // Debugging info
-        //std::cout << "Optimal solution found: Objective = " << fopt << "\n";
     }
     else if (status == "infeasible")
     {
         solution.status = status;
 
-        //std::cerr << "FBA optimization infeasible. Cell should die.\n";
         for (auto &reaction : this->reactions)
         {
             reaction->setFluxValue(0.0);
@@ -624,7 +607,6 @@ dFBASolution dFBAModel::optimize()
         std::cerr << "Reaction bounds at failure:\n";
         for (auto &reaction : this->reactions)
         {
-            int idx = this->reactionsIndexer[reaction->getId()];
             double lb = reaction->getLowerBound();
             double ub = reaction->getUpperBound();
             std::cerr << reaction->getId() << ": [" << lb << ", " << ub << "]\n";
@@ -638,24 +620,23 @@ dFBASolution dFBAModel::optimize()
 
 bool dFBAModel::getSolutionStatus()
 {
-    if (this->is_initialized)
-        return this->problem.isProvenOptimal();
-    else
-        return false;
+    if (!this->is_initialized) return false;
+    HighsModelStatus status = highs.getModelStatus();
+    return (status == HighsModelStatus::kOptimal);
 }
 
 double dFBAModel::getObjectiveValue()
 {
     assert(this->is_initialized);
-    if (this->problem.isProvenOptimal())
-        return this->problem.getObjValue();
-    else
-        std::cout << "WARNING: Primal infeasible" << std::endl;
-    return 0;
+    HighsModelStatus modelStatus = highs.getModelStatus();
+    if (modelStatus == HighsModelStatus::kOptimal) {
+      return highs.getInfo().objective_function_value;
+    } else {
+      std::cout << "WARNING: Primal infeasible or model not optimal" << std::endl;
+      return 0;
+    }
 }
 
 bool dFBAModel::isInitialized(){
     return this->is_initialized;
 }
-
-

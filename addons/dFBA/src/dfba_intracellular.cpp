@@ -668,9 +668,8 @@ void dFBAIntracellular::update_dfba_outputs(PhysiCell::Cell* pCell, PhysiCell::P
         dFBAReaction* exchange_flux = this->sbml_model.getReaction(fba_flux_id);
         double flux_value =  exchange_flux->getFluxValue(); // mmol/gDW/h
         // std::cout << "Exchange flux : " << fba_flux_id << " Flux value (mmol/gDW/h): " << flux_value << std::endl;
-        
-        // pCell->custom_data[fba_flux_id] = flux_value;
 
+        // pCell->custom_data[fba_flux_id] = flux_value;
         // Rescaling FBA exchanges flux into net_export_rates
         // Net export rates are expressed in substance/time
         // flux_value: mmol/gDW/h --> mmol/min

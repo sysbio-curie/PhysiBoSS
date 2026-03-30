@@ -13,8 +13,9 @@ CUR_DIR = $(shell pwd)
 EXT_DIR = $(CUR_DIR)/addons/dFBA/ext
 
 
-LIB := -L$(EXT_DIR)/libsbml/lib  $(EXT_DIR)/coin-or/lib/libClp.a $(EXT_DIR)/coin-or/lib/libCoinUtils.a -lsbml-static -lxml2 -lbz2 -lz -ggdb -llapack
-INC := -DADDON_PHYSIDFBA -I$(EXT_DIR)/libsbml/include -I$(EXT_DIR)/coin-or/include -I$(CUR_DIR)/addons/dFBA/src
+HIGHS_DIR = $(EXT_DIR)/hiGHS
+LIB := -L$(EXT_DIR)/libsbml/lib -L$(HIGHS_DIR)/build/lib -lhighs -lsbml-static -lxml2 -lbz2 -lz -ggdb -Wl,-rpath,$(HIGHS_DIR)/build/lib -Wl,-rpath,$(EXT_DIR)/libsbml/lib
+INC := -DADDON_PHYSIDFBA -I$(EXT_DIR)/libsbml/include -I$(HIGHS_DIR)/src -I$(HIGHS_DIR)/build -I$(CUR_DIR)/addons/dFBA/src
 
 
 ## "linux-x64", "linux-x86", "win64", "win32", "osx"
@@ -73,7 +74,7 @@ PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
 
 # put your custom objects here (they should be in the custom_modules directory)
 
-libFBA := ./addons/dFBA/ext/coin-or/include/coin/CoinPackedMatrix.hpp
+libFBA := ./addons/dFBA/ext/hiGHS/src/Highs.h
 
 PhysiCelldFBA_OBJECTS := dfba_Metabolite.o dfba_Reaction.o dfba_Solution.o dfba_Model.o dfba_intracellular.o
 

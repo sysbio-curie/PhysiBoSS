@@ -12,22 +12,18 @@ CFLAGS      := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m
 
 # Dependencies
 DEPS_DIR    := ../ext
-DEPS_CFLAGS := -I$(DEPS_DIR)/libsbml/include -I$(DEPS_DIR)/coin-or/include -I../src
-LD_PATH     := -L$(DEPS_DIR)/libsbml/lib -L$(DEPS_DIR)/coin-or/lib
+HIGHS_DIR   := $(DEPS_DIR)/hiGHS
+DEPS_CFLAGS := -I$(DEPS_DIR)/libsbml/include -I$(HIGHS_DIR)/src -I$(HIGHS_DIR)/build -I../src
+LD_PATH     := -L$(DEPS_DIR)/libsbml/lib -L$(HIGHS_DIR)/build/lib
 
 # Runtime rpath (so you don’t need LD_LIBRARY_PATH)
-RPATH       := -Wl,-rpath,$(DEPS_DIR)/libsbml/lib -Wl,-rpath,$(DEPS_DIR)/coin-or/lib
+RPATH       := -Wl,-rpath,$(DEPS_DIR)/libsbml/lib -Wl,-rpath,$(HIGHS_DIR)/build/lib
 
 ## "linux-x64", "linux-x86", "win64", "win32", "osx"
 PKG_ARCH := linux-x64
 
-# --- Link against the actual names installed by setup_fba.py ---
-# Use the static archives explicitly (portable), or switch to -lClp -lCoinUtils to use shared libs.
-LIBS        := $(DEPS_DIR)/coin-or/lib/libClp.a $(DEPS_DIR)/coin-or/lib/libCoinUtils.a \
-               -llapack -lsbml-static -lxml2 -lbz2 -lz
-
-# If you prefer shared libs, comment the two lines above and use this instead:
-# LIBS      := -lClp -lCoinUtils -llapack -lsbml -lxml2 -lbz2 -lz
+# --- Link against HiGHS ---
+LIBS        := -lhighs -lsbml-static -lxml2 -lbz2 -lz
 
 ifeq ($(OS),Windows_NT)
   WIN_LD_FLAG := -LC:\msys64\mingw64\bin
@@ -55,8 +51,8 @@ vpath %.h     $(SRC_DIR)
 # Objects from ../src
 ALL_OBJECTS := dfba_Metabolite.o dfba_Reaction.o dfba_Solution.o dfba_Model.o
 
-# Use a concrete header as the sentinel that setup_fba.py produced deps
-LIBFBA_SENTINEL := $(DEPS_DIR)/coin-or/include/coin/CoinPackedMatrix.hpp
+# Use a concrete header as the sentinel that deps are present
+LIBFBA_SENTINEL := $(HIGHS_DIR)/src/Highs.h
 
 .PHONY: all make_lib clean libFBA test_sbml test_clp test_fba
 
@@ -84,7 +80,7 @@ libFBA: $(LIBFBA_SENTINEL)
 
 $(LIBFBA_SENTINEL):
 	python3 ../../../beta/setup_fba.py --pkg libsbml --arch $(PKG_ARCH)
-	python3 ../../../beta/setup_fba.py --pkg coin-or --arch $(PKG_ARCH)
+	@echo "HiGHS library expected at $(HIGHS_DIR)/build/lib"
 
 # --- Object files (compile stage; no link libs here) ---
 dfba_intracellular.o: ../src/dfba_intracellular.cpp

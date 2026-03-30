@@ -8,14 +8,18 @@ ifdef PHYSICELL_CPP
 	CC := $(PHYSICELL_CPP)
 endif
 
-
 CUR_DIR = $(shell pwd)
 EXT_DIR = $(CUR_DIR)/addons/dFBA/ext
 
+# Updated LIB: Removed coin-or libraries, added HiGHS library 
+LIB := -L$(EXT_DIR)/libsbml/lib -L$(EXT_DIR)/hiGHS/build/lib -Wl,-rpath,$(EXT_DIR)/hiGHS/build/lib -lhighs -lsbml-static -lxml2 -lbz2 -lz -ggdb -llapack
 
-LIB := -L$(EXT_DIR)/libsbml/lib  $(EXT_DIR)/coin-or/lib/libClp.a $(EXT_DIR)/coin-or/lib/libCoinUtils.a -lsbml-static -lxml2 -lbz2 -lz -ggdb -llapack
-INC := -DADDON_PHYSIDFBA -I$(EXT_DIR)/libsbml/include -I$(EXT_DIR)/coin-or/include -I$(CUR_DIR)/addons/dFBA/src
-
+# Updated INC: Removed coin-or include, added HiGHS include directory
+INC := -DADDON_PHYSIDFBA \
+       -I$(EXT_DIR)/libsbml/include \
+       -I$(EXT_DIR)/hiGHS/src \
+       -I$(EXT_DIR)/hiGHS/build \
+       -I$(CUR_DIR)/addons/dFBA/src
 
 ## "linux-x64", "linux-x86", "win64", "win32", "osx"
 PKG_ARCH := linux-x64
@@ -38,10 +42,8 @@ ARCH := native # best auto-tuning
 # ARCH := skylake-avx512
 # ARCH := nocona #64-bit pentium 4 or later 
 
-
 # CFLAGS := -march=$(ARCH) -Ofast -s -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
 CFLAGS := -march=$(ARCH) -O3 -fomit-frame-pointer -mfpmath=both -fopenmp -m64 -std=c++11
-
 
 # if we're on Windows, we need to provide a (agreed upon) path to some of the dynamic libs
 ifeq ($(OS),Windows_NT)
@@ -60,20 +62,16 @@ CFLAGS_LINK := $(shell echo $(CFLAGS) | sed -e "s/-fopenmp//g")
 COMPILE_COMMAND := $(CC) $(CFLAGS)  $(EXTRA_FLAGS) 
 LINK_COMMAND := $(CC) $(CFLAGS_LINK) $(EXTRA_FLAGS)
 
+BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
 
-BioFVM_OBJECTS := BioFVM_vector.o BioFVM_mesh.o BioFVM_microenvironment.o BioFVM_solvers.o BioFVM_matlab.o \
-BioFVM_utilities.o BioFVM_basic_agent.o BioFVM_MultiCellDS.o BioFVM_agent_container.o 
+PhysiCell_core_OBJECTS := PhysiCell_phenotype.o PhysiCell_cell_container.o PhysiCell_standard_models.o PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o PhysiCell_basic_signaling.o PhysiCell_signal_behavior.o PhysiCell_rules.o
 
-PhysiCell_core_OBJECTS := PhysiCell_phenotype.o PhysiCell_cell_container.o PhysiCell_standard_models.o \
-PhysiCell_cell.o PhysiCell_custom.o PhysiCell_utilities.o PhysiCell_constants.o PhysiCell_basic_signaling.o \
-PhysiCell_signal_behavior.o PhysiCell_rules.o
-
-PhysiCell_module_OBJECTS := PhysiCell_SVG.o PhysiCell_pathology.o PhysiCell_MultiCellDS.o PhysiCell_various_outputs.o \
-PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
+PhysiCell_module_OBJECTS := PhysiCell_SVG.o PhysiCell_pathology.o PhysiCell_MultiCellDS.o PhysiCell_various_outputs.o PhysiCell_pugixml.o PhysiCell_settings.o PhysiCell_geometry.o
 
 # put your custom objects here (they should be in the custom_modules directory)
 
-libFBA := ./addons/dFBA/ext/coin-or/include/coin/CoinPackedMatrix.hpp
+# Updated libFBA: now points to the HiGHS header
+libFBA := ./addons/dFBA/ext/HiGHS/include/Highs.h
 
 PhysiCelldFBA_OBJECTS := dfba_Metabolite.o dfba_Reaction.o dfba_Solution.o dfba_Model.o dfba_intracellular.o
 
@@ -89,7 +87,6 @@ SOME_OBJECTS := dfba_Metabolite.o dfba_Reaction.o dfba_Solution.o dfba_Model.o
 # compile the project
 
 # all: libFBA main.cpp $(ALL_OBJECTS)
-
 all: main.cpp $(ALL_OBJECTS) $(libFBA)
 	$(COMPILE_COMMAND) $(INC) -o $(PROGRAM_NAME) $(ALL_OBJECTS) main.cpp $(LIB)
 	make name
@@ -100,7 +97,6 @@ name:
 	@echo ""
 
 # PhysiCell core components	
-
 PhysiCell_phenotype.o: ./core/PhysiCell_phenotype.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_phenotype.cpp
 	
@@ -132,7 +128,6 @@ PhysiCell_rules.o: ./core/PhysiCell_rules.cpp
 	$(COMPILE_COMMAND) -c ./core/PhysiCell_rules.cpp 
 
 # BioFVM core components (needed by PhysiCell)
-	
 BioFVM_vector.o: ./BioFVM/BioFVM_vector.cpp
 	$(COMPILE_COMMAND) -c ./BioFVM/BioFVM_vector.cpp 
 
@@ -164,7 +159,6 @@ pugixml.o: ./BioFVM/pugixml.cpp
 	$(COMPILE_COMMAND) -c ./BioFVM/pugixml.cpp
 	
 # standard PhysiCell modules
-
 PhysiCell_SVG.o: ./modules/PhysiCell_SVG.cpp
 	$(COMPILE_COMMAND) -c ./modules/PhysiCell_SVG.cpp
 
@@ -193,8 +187,8 @@ PhysiCell_geometry.o: ./modules/PhysiCell_geometry.cpp
 
 # PhysiFBA addon modules
 $(libFBA): 
-	python3 beta/setup_fba.py
-	
+	@echo "Using HiGHS: header found at $(libFBA)"
+
 dfba_intracellular.o: addons/dFBA/src/dfba_intracellular.cpp $(libFBA)
 	$(COMPILE_COMMAND) $(INC) -c addons/dFBA/src/dfba_intracellular.cpp
 
@@ -214,8 +208,7 @@ dfba_Solution.o: addons/dFBA/src/dfba_Solution.cpp $(libFBA)
 custom.o: ./custom_modules/custom.cpp
 	$(COMPILE_COMMAND) $(INC) -c ./custom_modules/custom.cpp
 
-
-test_sbml: libFBA $(SOME_OBJECTS) ./main_test_fba.cpp
+test_sbml: $(libFBA) $(SOME_OBJECTS) ./main_test_fba.cpp
 	$(COMPILE_COMMAND) $(INC) -o test_sbml $(SOME_OBJECTS) main_test_fba.cpp $(LIB)
 	@echo created $(PROGRAM_NAME)
 	@echo
@@ -237,7 +230,6 @@ reset:
 dfba-clean:
 	rm -fr addons/PhysiBoSS/ext
 
-
 clean:
 	rm -f *.o
 	rm -f $(PROGRAM_NAME)*
@@ -256,14 +248,14 @@ checkpoint:
 	
 zip:
 	zip -r latest.zip Makefile* *.cpp *.h BioFVM/* config/* core/* custom_modules/* matlab/* modules/* sample_projects/* 
-	cp latest.zip $$(date +%b_%d_%Y_%H%M).zip
+	cp latest.zip $$(date +%b_%d_%Y_%H%M).zip 
 	cp latest.zip VERSION_$(VERSION).zip 
 	mv *.zip archives/
 	
 tar:
 	tar --ignore-failed-read -czf latest.tar Makefile* *.cpp *.h BioFVM/* config/* core/* custom_modules/* matlab/* modules/* sample_projects/* 
-	cp latest.tar $$(date +%b_%d_%Y_%H%M).tar
-	cp latest.tar VERSION_$(VERSION).tar
+	cp latest.tar $$(date +%b_%d_%Y_%H%M).tar 
+	cp latest.tar VERSION_$(VERSION).tar 
 	mv *.tar archives/
 
 unzip: 

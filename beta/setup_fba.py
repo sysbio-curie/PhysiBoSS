@@ -59,6 +59,64 @@ def download_and_extract(url, dest_path, is_zip=False):
     os.remove(file_path)
     print(f"{filename} installed successfully.\n")
 
+def rearrange_highs(pkg_path):
+    """Rearrange HiGHS precompiled binary layout to match the Makefile expectations.
+
+    Precompiled layout:          Expected layout (Makefile):
+      include/highs/*       ->    src/*
+      include/highs_export.h ->   src/highs_export.h
+      include/highs/HConfig.h ->  build/HConfig.h
+      lib/*                 ->    build/lib/*
+      bin/*                 ->    build/bin/*
+    """
+    import shutil
+
+    src_dir = os.path.join(pkg_path, "src")
+    build_dir = os.path.join(pkg_path, "build")
+    build_lib_dir = os.path.join(build_dir, "lib")
+    build_bin_dir = os.path.join(build_dir, "bin")
+
+    include_dir = os.path.join(pkg_path, "include")
+    include_highs_dir = os.path.join(include_dir, "highs")
+    lib_dir = os.path.join(pkg_path, "lib")
+    bin_dir = os.path.join(pkg_path, "bin")
+
+    # Move include/highs/* -> src/
+    if os.path.isdir(include_highs_dir):
+        if os.path.exists(src_dir):
+            shutil.rmtree(src_dir)
+        shutil.move(include_highs_dir, src_dir)
+
+    # Move include/highs_export.h -> src/highs_export.h
+    export_h = os.path.join(include_dir, "highs_export.h")
+    if os.path.isfile(export_h):
+        shutil.move(export_h, os.path.join(src_dir, "highs_export.h"))
+
+    # Copy src/HConfig.h -> build/HConfig.h
+    ensure_directory_exists(build_dir)
+    hconfig = os.path.join(src_dir, "HConfig.h")
+    if os.path.isfile(hconfig):
+        shutil.copy2(hconfig, os.path.join(build_dir, "HConfig.h"))
+
+    # Move lib/* -> build/lib/
+    if os.path.isdir(lib_dir):
+        if os.path.exists(build_lib_dir):
+            shutil.rmtree(build_lib_dir)
+        shutil.move(lib_dir, build_lib_dir)
+
+    # Move bin/* -> build/bin/
+    if os.path.isdir(bin_dir):
+        if os.path.exists(build_bin_dir):
+            shutil.rmtree(build_bin_dir)
+        shutil.move(bin_dir, build_bin_dir)
+
+    # Clean up empty include directory
+    if os.path.isdir(include_dir):
+        shutil.rmtree(include_dir)
+
+    print("HiGHS files rearranged to match Makefile layout.")
+
+
 def main():
     # Define paths
     current_folder = os.path.abspath(os.path.dirname(__file__))
@@ -74,7 +132,7 @@ def main():
     arch = get_os_arch()
 
     # Install packages
-    for pkg in ("coin-or", "libsbml"):
+    for pkg in ("hiGHS", "libsbml"):
         pkg_path = os.path.join(default_libs_path, pkg)
 
         # Skip download if package folder already exists and is populated
@@ -93,6 +151,10 @@ def main():
         url = pkg_dict['url']
         is_zip = url.endswith("zip")
         download_and_extract(url, pkg_path, is_zip)
+
+        # Rearrange HiGHS files to match the expected Makefile layout
+        if pkg == "hiGHS":
+            rearrange_highs(pkg_path)
 
 if __name__ == "__main__":
     main()

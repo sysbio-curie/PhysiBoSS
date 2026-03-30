@@ -1,26 +1,29 @@
-{  
-    "coin-or":
+{
+    "hiGHS":
     {
-        "_refurl": "https://github.com/PhysiCell-Tools/intracellular_libs",
-        "linux-x64": 
+        "_refurl": "https://github.com/ERGO-Code/HiGHS/releases",
+        "_version": "1.13.1",
+        "_layout": "precompiled: include/highs/* -> src/, lib/* -> build/lib/, include/highs/HConfig.h -> build/HConfig.h",
+        "linux-x64":
         {
-            "version": "Clp-1.17.10-linux64.tar.gz",
-            "url": "https://github.com/PhysiCell-Tools/intracellular_libs/releases/download/0.1.0/Clp-1.17.10-linux64.tar.gz"
+            "version": "highs-1.13.1-x86_64-linux-gnu-static-mit.tar.gz",
+            "url": "https://github.com/ERGO-Code/HiGHS/releases/download/v1.13.1/highs-1.13.1-x86_64-linux-gnu-static-mit.tar.gz"
         },
-        "win64": 
+        "win64":
         {
-            "version": "Clp-1.17.10-win64.tar.gz",
-            "url": "https://github.com/PhysiCell-Tools/intracellular_libs/releases/download/0.1.0/Clp-1.17.10-win64.tar.gz"
+            "version": "highs-1.13.1-x86_64-windows-mit.zip",
+            "url": "https://github.com/ERGO-Code/HiGHS/releases/download/v1.13.1/highs-1.13.1-x86_64-windows-mit.zip"
         },
         "osx-arm64":
         {
-            "version": "Clp-1.17.10-osx-arm64.tar.gz",
-            "url": "https://github.com/PhysiCell-Tools/intracellular_libs/releases/download/0.1.0/Clp-1.17.10-osx-arm64.tar.gz"
+            "version": "highs-1.13.1-arm-apple-static-mit.tar.gz",
+            "url": "https://github.com/ERGO-Code/HiGHS/releases/download/v1.13.1/highs-1.13.1-arm-apple-static-mit.tar.gz"
         },
         "osx-x86_64":
         {
-            "version": "Clp-1.17.10-osx-x86_64.tar.gz",
-            "url": "https://github.com/PhysiCell-Tools/intracellular_libs/releases/download/0.1.0/Clp-1.17.10-osx-x86_64.tar.gz"
+            "version": "highs-1.13.1-x86_64-linux-gnu-static-mit.tar.gz",
+            "url": "https://github.com/ERGO-Code/HiGHS/releases/download/v1.13.1/highs-1.13.1-x86_64-linux-gnu-static-mit.tar.gz",
+            "_note": "No x86_64 macOS binary available; using Linux x86_64 as placeholder"
         }
     },
     "libsbml": 

@@ -16,9 +16,7 @@
 #include <sbml/SBMLTypes.h>
 #include <sbml/packages/fbc/common/FbcExtensionTypes.h>
 
-#include <coin/CoinPackedMatrix.hpp>
-#include <coin/CoinPackedVector.hpp>
-#include <coin/ClpSimplex.hpp>
+#include "Highs.h"
 
 #include "dfba_Metabolite.h"
 #include "dfba_Solution.h"
@@ -51,10 +49,8 @@ class dFBAModel
 		/** \brief solution  */
 		dFBASolution solution;
 
-		/** \brief Coin CLP simplex model to encode the FBA problem**/
-		ClpSimplex problem;
-		
-		CoinMessageHandler* handler;
+		/** \brief HiGHS solver instance to encode the FBA problem **/
+		Highs highs;
 
 		bool is_initialized = false;
 
@@ -130,13 +126,15 @@ class dFBAModel
 		/** \brief Get the list of IDs of the boundary reactions*/
 		std::vector<std::string> getListOfBoundaryReactionIds();
 
-		/** \brief Get the ClpSimplex model */
-		const ClpSimplex* getLpModel() const;
+		/** \brief Get the HiGHS solver instance */
+		const Highs* getLpModel() const {
+			return &this->highs;
+		}
 
 		/** \brief Parse and read a metabolic model from a SBML file*/
 		void readSBMLModel(const char* sbmlFileName);
 		
-		/** \brief Initialize the ClpSimplex model */
+		/** \brief Initialize the HiGHS LP model */
 		void initProblem();
 
 		/** \brief Initialize the CBM model and the LP problem */

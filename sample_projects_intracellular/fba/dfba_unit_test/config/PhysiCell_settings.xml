@@ -281,8 +281,8 @@
                     <damage_repair_rate units="1/min">0.0</damage_repair_rate>
                 </cell_integrity>
                 <intracellular type="dfba">
-                    <sbml_filename>./config/Ecoli_core.xml</sbml_filename>
                     <settings>
+                        <sbml_filename>./config/Ecoli_core.xml</sbml_filename>
                         <intracellular_dt>0.1</intracellular_dt>
                     </settings>
                     <transport_model>
