@@ -7,9 +7,7 @@
 #include <map>
 #include <iomanip>   // for setw
 
-#include <coin/CoinPackedMatrix.hpp>
-#include <coin/CoinPackedVector.hpp>
-#include <coin/ClpSimplex.hpp>
+#include "Highs.h"
 
 #include "../../../core/PhysiCell.h"
 #include "../../../core/PhysiCell_phenotype.h"
